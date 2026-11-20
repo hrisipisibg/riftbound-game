@@ -1406,7 +1406,7 @@ namespace Riftbound.Editor
                 leftArm.position + new Vector3(-0.03f, 0.045f, 0f), Quaternion.Euler(0f, 180f, 0f), Vector3.one * scale, leftArm);
         }
 
-        internal static void AttachWeaponToHand(GameObject visual, Animator anim, bool isRightHand, string weaponFbxPath, PaletteMode palette)
+        static void AttachWeaponToHand(GameObject visual, Animator anim, bool isRightHand, string weaponFbxPath, PaletteMode palette)
         {
             string slotName = isRightHand ? "handslot.r" : "handslot.l";
             Transform hand = visual.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => string.Equals(t.name, slotName, StringComparison.OrdinalIgnoreCase));

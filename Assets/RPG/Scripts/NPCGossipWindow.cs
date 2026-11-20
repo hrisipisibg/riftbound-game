@@ -94,7 +94,9 @@ namespace Riftbound
                 alignment = TextAnchor.MiddleLeft,
                 padding = new RectOffset(10, 10, 4, 4)
             };
-            optionStyle.normal.textColor = new Color(0.10f, 0.06f, 0.02f);
+            optionStyle.normal.textColor = new Color(1f, .95f, .81f);
+            optionStyle.hover.textColor = optionStyle.focused.textColor = Color.white;
+            optionStyle.active.textColor = new Color(1f, .87f, .53f);
 
             var feedbackStyle = new GUIStyle(small) { fontStyle = FontStyle.Bold };
             feedbackStyle.normal.textColor = new Color(0.05f, 0.45f, 0.15f);
@@ -111,6 +113,29 @@ namespace Riftbound
                 string greetingLine = !string.IsNullOrEmpty(greetingSel.text) ? greetingSel.text : npc.greeting;
                 GUILayout.Label($"\"{greetingLine}\"", quoteStyle);
                 GUILayout.Space(10f);
+
+                if (npc.npcName == WesternRoadCamps.Witness && player.CanUseWesternRoadQuest)
+                {
+                    if (player.WesternRoadStage == 2)
+                    {
+                        GUILayout.Label("I tallied one wagon with one broken wheel. I’ll give you my crossing record. It says what I saw, nothing about who signed your waybill.", bodyStyle);
+                        if (GUILayout.Button("Take a copy of Sera's tally", optionStyle, GUILayout.Height(32f)))
+                            player.ReadFerryTally();
+                    }
+                    else if (player.WesternRoadStage >= 3)
+                        GUILayout.Label("Tell Rowan the wagon had one broken wheel. That’s the crossing I can vouch for.", bodyStyle);
+                    GUILayout.Space(6f);
+                }
+                if (npc.npcName == BrassHollows.Engineer && player.CanUseBrassHollowsQuest)
+                {
+                    if (player.BrassHollowsStage == 0)
+                        GUILayout.Label("An old quarry on Redridge Pass is ringing like a bell. The Hollow Choir took our regulator. Clear the mine, shut down their siphon and bring it home.", bodyStyle);
+                    else GUILayout.Label(player.BrassHollowsObjective, bodyStyle);
+                    if ((player.BrassHollowsStage == 0 || player.BrassHollowsStage == 2) &&
+                        GUILayout.Button(player.BrassHollowsStage == 0 ? "Accept: Cut the Siphon" : "Return the regulator", optionStyle, GUILayout.Height(32f)))
+                        player.HandleBrassHollowsQuest();
+                    GUILayout.Space(8f);
+                }
 
                 // Divider line
                 DrawParchmentDivider();

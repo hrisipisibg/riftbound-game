@@ -9,7 +9,6 @@
 *.anim text eol=lf
 *.controller text eol=lf
 *.asset text eol=lf
-
 # Models, source artwork, textures, audio and native plugins use Git LFS.
 *.fbx filter=lfs diff=lfs merge=lfs -text
 *.FBX filter=lfs diff=lfs merge=lfs -text
@@ -36,3 +35,6 @@
 "Assets/RPG/Terrain/Frontier Terrain.asset" filter=lfs diff=lfs merge=lfs -text
 Assets/RPG/Terrain/WorldExpansion/*.asset filter=lfs diff=lfs merge=lfs -text
 Assets/RPG/Terrain/ReaverCamp/*.asset filter=lfs diff=lfs merge=lfs -text
+*.glb filter=lfs diff=lfs merge=lfs -text
+Assets/RPG/ProceduralKit/Landscape/*.asset filter=lfs diff=lfs merge=lfs -text
+"Assets/RPG/ProceduralKit/World Surfaces/Terrain/*.asset" filter=lfs diff=lfs merge=lfs -text

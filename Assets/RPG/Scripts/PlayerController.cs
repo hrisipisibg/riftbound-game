@@ -51,6 +51,7 @@ namespace Riftbound
         public void ClearCombatInputBuffer() { bufferedAbilitySlot = 0; bufferedAbilityExpiresAt = 0f; }
         Vector3 moveVelocity;
         readonly JumpInputBuffer jumpInput = new JumpInputBuffer();
+        readonly RaycastHit[] combatSightHits = new RaycastHit[16];
         Quaternion visualBaseRotation = Quaternion.identity;
         bool hasVisualBaseRotation;
         float visualYawOffset;
@@ -185,16 +186,21 @@ namespace Riftbound
             var keys = Keyboard.current;
             if (keys == null || FrontendMenu.IsOpen || (orbit && orbit.Paused))
             {
-                jumpInput.Reset(); ClearCombatInputBuffer();
+                jumpInput.Reset();
+                ClearCombatInputBuffer();
                 return;
             }
             if (orbit) orbit.RefreshInput();
+            if (AnyBlockingWindowOpen() || PrototypeHUD.MenuOpen)
+            {
+                ClearCombatInputBuffer();
+                jumpInput.Reset();
+            }
             if (PrototypeHUD.MenuOpen || (PartySystem.Instance && PartySystem.Instance.IsCompanionMenuOpen))
             {
-                moveVelocity = Vector3.zero;
                 if (animator) animator.speed = 1;
                 Play(Mounted ? "Ride" : "Idle");
-                GravityOnly();
+                HoldMenuPosition();
                 return;
             }
             if (UpdateMounts(keys)) return;
@@ -213,7 +219,7 @@ namespace Riftbound
                     MapOpen = false; InventoryOpen = false; EncounterJournalOpen = false; TalentsOpen = false; ProfessionSystem.IsOpen = false; SpellbookOpen = false; AchievementOpen = false; ReputationOpen = false;
                 }
             }
-            if (keys.nKey.wasPressedThisFrame && Stats.Alive && !DialogueOpen && !ShopOpen && !ChatOpen && Time.time >= busyUntil && !Blocking) { TalentsOpen = !TalentsOpen; MapOpen = false; InventoryOpen = false; JournalOpen = false; ProfessionSystem.IsOpen = false; }
+            if (keys.nKey.wasPressedThisFrame && Stats.Alive && !DialogueOpen && !ShopOpen && !ChatOpen && Time.time >= busyUntil && !Blocking) { TalentsOpen = !TalentsOpen; MapOpen = false; InventoryOpen = false; JournalOpen = false; ProfessionSystem.IsOpen = false; SpellbookOpen = false; }
             if (keys.kKey.wasPressedThisFrame && Stats.Alive && !DialogueOpen && !ShopOpen && !ChatOpen && Time.time >= busyUntil && !Blocking) { ProfessionSystem.IsOpen = !ProfessionSystem.IsOpen; MapOpen = false; InventoryOpen = false; JournalOpen = false; TalentsOpen = false; SpellbookOpen = false; }
             if (keys.pKey.wasPressedThisFrame && Stats.Alive && !DialogueOpen && !ShopOpen && !ChatOpen && Time.time >= busyUntil && !Blocking) { SpellbookOpen = !SpellbookOpen; MapOpen = false; InventoryOpen = false; JournalOpen = false; TalentsOpen = false; ProfessionSystem.IsOpen = false; AchievementOpen = false; }
             if (keys.yKey.wasPressedThisFrame && Stats.Alive && !DialogueOpen && !ShopOpen && !ChatOpen && Time.time >= busyUntil && !Blocking) { AchievementOpen = !AchievementOpen; MapOpen = false; InventoryOpen = false; JournalOpen = false; TalentsOpen = false; ProfessionSystem.IsOpen = false; SpellbookOpen = false; ReputationOpen = false; }
@@ -229,8 +235,8 @@ namespace Riftbound
             }
             if (ShopOpen || MapOpen || JournalOpen || EncounterJournalOpen || TalentsOpen || ChatOpen || ProfessionSystem.IsOpen || SpellbookOpen || AchievementOpen || ReputationOpen || FlightMaster.IsAnyTaxiMapOpen || (GuildSystem.Instance && GuildSystem.Instance.IsOpen))
             {
-                moveVelocity = Vector3.zero; Play(Mounted ? "Ride" : "Idle"); if (animator) animator.speed = 1;
-                GravityOnly();
+                Play(Mounted ? "Ride" : "Idle"); if (animator) animator.speed = 1;
+                HoldMenuPosition();
                 if (keys.escapeKey.wasPressedThisFrame)
                 {
                     if (ShopOpen) CloseShop();
@@ -245,9 +251,8 @@ namespace Riftbound
             }
             if (DialogueOpen)
             {
-                moveVelocity = Vector3.zero;
-                Play("Idle"); if (animator) animator.speed = 1;
-                GravityOnly();
+                Play(Mounted ? "Ride" : "Idle"); if (animator) animator.speed = 1;
+                HoldMenuPosition();
                 bool withinRange = (ActiveQuestGiver != null && CanTalk()) || 
                                    (ActiveTownNPC != null && Vector3.Distance(transform.position, ActiveTownNPC.transform.position) < 4.5f);
                 if (keys.escapeKey.wasPressedThisFrame || !withinRange || Stats.LastHit > dialogueOpenedAt || (Time.time > dialogueOpenedAt + 0.35f && keys.eKey.wasPressedThisFrame)) CloseDialogue();
@@ -274,7 +279,10 @@ namespace Riftbound
             if (Target && (!Target.Alive || Vector3.Distance(transform.position, Target.transform.position) > 28)) Target = null;
 
             var mouse = Mouse.current;
-            if (mouse != null && (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame) && !DialogueOpen && !ShopOpen && !MapOpen && !JournalOpen && !InventoryOpen && Camera.main)
+            if (mouse != null && (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame) &&
+                !MinimapRadar.TakesMouse(this, mouse.position.ReadValue()) &&
+                !PrototypeHUD.QuestPointerTakesMouse(this, mouse.position.ReadValue(), mouse.leftButton.wasPressedThisFrame) &&
+                !DialogueOpen && !ShopOpen && !MapOpen && !JournalOpen && !InventoryOpen && Camera.main)
             {
                 var ray = Camera.main.ScreenPointToRay(mouse.position.ReadValue());
                 if (Physics.Raycast(ray, out var hit, 40f, ~(1 << 2), QueryTriggerInteraction.Collide))
@@ -302,6 +310,13 @@ namespace Riftbound
                 var csSys = CharacterSheetSystem.Instance ?? GetComponent<CharacterSheetSystem>();
                 if (csSys) csSys.ToggleSheet();
             }
+            bool isFlyingMount = RidingFlyingMount;
+            // Some overlays, including inventory and the character sheet, open later in this update.
+            if (isFlyingMount && (AnyBlockingWindowOpen() || PrototypeHUD.MenuOpen))
+            {
+                HoldMenuPosition();
+                return;
+            }
             if ((keys.slashKey != null && keys.slashKey.wasPressedThisFrame) || (keys.numpadDivideKey != null && keys.numpadDivideKey.wasPressedThisFrame)) Walking = !Walking;
             bool running = !Walking;
 
@@ -314,7 +329,8 @@ namespace Riftbound
             bool leftInput = keys.aKey.isPressed || keys.leftArrowKey.isPressed || (rightMouseSteering && qPressed);
             bool rightInput = keys.dKey.isPressed || keys.rightArrowKey.isPressed;
 
-            bool isFlyingMount = Mounted && SelectedMount && SelectedMount.isFlying;
+            bool turnLeft = keys.leftArrowKey.isPressed || (Mounted && leftInput);
+            bool turnRight = keys.rightArrowKey.isPressed || (Mounted && rightInput);
 
             // In WoW: Right-mouse turns the character directly to camera heading
             if (rightMouseSteering)
@@ -333,9 +349,8 @@ namespace Riftbound
             }
             else
             {
-                // Keyboard turning when not holding right-click (responsive 220 deg/s)
-                if (leftInput && !rightInput) transform.Rotate(0, -220f * Time.deltaTime, 0);
-                else if (rightInput && !leftInput) transform.Rotate(0, 220f * Time.deltaTime, 0);
+                if (turnLeft && !turnRight) transform.Rotate(0, -220f * Time.deltaTime, 0);
+                else if (turnRight && !turnLeft) transform.Rotate(0, 220f * Time.deltaTime, 0);
                 if (isFlyingMount && transform.eulerAngles.x != 0)
                 {
                     // Level out pitch smoothly when not right-mouse steering
@@ -345,7 +360,6 @@ namespace Riftbound
                 }
             }
 
-            // Direction calculation:
             Vector3 moveDirection = Vector3.zero;
             if (isFlyingMount && rightMouseSteering)
             {
@@ -357,27 +371,29 @@ namespace Riftbound
             }
             else
             {
-                var forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-                var right = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
+                Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+                Vector3 right = Vector3.Cross(Vector3.up, forward);
+                if (!Mounted && orbit && !rightMouseSteering && !turnLeft && !turnRight)
+                {
+                    forward = Quaternion.Euler(0f, orbit.Yaw, 0f) * Vector3.forward;
+                    right = Vector3.Cross(Vector3.up, forward);
+                }
                 if (forwardInput) moveDirection += forward;
                 if (backInput) moveDirection -= forward;
-
-                if (rightMouseSteering)
-                {
-                    // A and D strafe when holding right-click
-                    if (leftInput) moveDirection -= right;
-                    if (rightInput) moveDirection += right;
-                }
+                if ((!Mounted && keys.aKey.isPressed) || (rightMouseSteering && leftInput)) moveDirection -= right;
+                if ((!Mounted && keys.dKey.isPressed) || (rightMouseSteering && rightInput)) moveDirection += right;
             }
 
             if (moveDirection.sqrMagnitude > 1f) moveDirection.Normalize();
 
             bool isBackpedaling = backInput && !forwardInput;
-            bool diagonalBackpedal = isBackpedaling && rightMouseSteering && (leftInput || rightInput);
+            bool diagonalBackpedal = isBackpedaling && (keys.aKey.isPressed || keys.dKey.isPressed ||
+                (rightMouseSteering && (leftInput || rightInput)));
             float speed = Mounted && SelectedMount ? (running ? SelectedMount.runSpeed : SelectedMount.walkSpeed) : running ? runSpeed : walkSpeed;
             if (CharacterRace == "Human") speed *= 1.10f;
             if (Time.time < sprintUntil) speed *= 1.65f;
             speed *= WorldShrineSystem.GetSpeedMultiplier();
+            if (!Mounted && HasMilestone("fleetfoot")) speed *= 1.08f;
             UpdateMotionTrail(Time.time < sprintUntil || Time.time < dodgeEnds || Mounted);
             if (isBackpedaling && !Mounted) speed *= (diagonalBackpedal ? 0.78f : backwardMultiplier);
 
@@ -393,29 +409,36 @@ namespace Riftbound
                 else if (!motor.isGrounded) verticalFly = 0f;
                 else verticalFly = -2f;
 
-                // When holding right-click and pitching, vertical flight velocity is already in moveDirection
-                if (rightMouseSteering && (forwardInput || backInput))
-                {
-                    vertical = verticalFly; // Space and X still provide additional lift/dive
-                }
-                else
-                {
-                    vertical = verticalFly;
-                }
+                vertical = verticalFly;
+                jumpInput.Reset();
             }
             else
             {
-                if (motor.isGrounded && vertical < 0) vertical = -2;
-                if (jumpInput.TryJump(Time.time, motor.isGrounded && vertical <= 0,
-                    keys.spaceKey.wasPressedThisFrame, Time.time >= busyUntil && !Blocking)) vertical = 6.4f;
+                bool grounded = motor.isGrounded && vertical <= 0;
+                if (grounded) vertical = -2f;
+                if (jumpInput.TryJump(Time.time, grounded, keys.spaceKey.wasPressedThisFrame, !Blocking))
+                    vertical = 6.4f;
                 vertical += Physics.gravity.y * 2.1f * Time.deltaTime;
             }
 
-            bool attacking = Time.time < busyUntil || Blocking;
-            var desiredVelocity = attacking ? Vector3.zero : moveDirection * speed;
+            bool actionInProgress = Time.time < busyUntil;
+            bool dodging = Time.time < dodgeEnds;
+            // Combat recovery gates the next ability, while guard still holds the player in place.
+            var desiredVelocity = Blocking ? Vector3.zero : moveDirection * speed;
+            if (!Mounted && !actionInProgress && !Blocking && !dodging && !rightMouseSteering && moveDirection.sqrMagnitude > .01f)
+            {
+                var facing = isBackpedaling ? -moveDirection : moveDirection;
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(facing), 680f * Time.deltaTime);
+            }
 
-            // In WoW: Instant acceleration/deceleration response (no sliding inertia)
-            moveVelocity = Time.time < dodgeEnds ? dodgeDir * 15.5f : desiredVelocity;
+            if (dodging) moveVelocity = dodgeDir * 15.5f;
+            else if (Mounted || Blocking) moveVelocity = desiredVelocity;
+            else
+            {
+                if (Time.time - Time.deltaTime < dodgeEnds) moveVelocity = Vector3.zero;
+                float acceleration = desiredVelocity.sqrMagnitude > .001f ? 62f : 88f;
+                moveVelocity = Vector3.MoveTowards(moveVelocity, desiredVelocity, acceleration * Time.deltaTime);
+            }
             if (Mounted && !MountPathClear(moveVelocity)) moveVelocity = Vector3.zero;
             if (motor && motor.enabled)
             {
@@ -427,7 +450,9 @@ namespace Riftbound
 
             var planarVelocity = motor.velocity; planarVelocity.y = 0;
             float actualSpeed = planarVelocity.magnitude;
-            bool turningInPlace = !rightMouseSteering && (leftInput ^ rightInput) && actualSpeed <= 0.2f;
+            bool turningInPlace = !rightMouseSteering && (turnLeft ^ turnRight) && actualSpeed <= 0.2f;
+            bool holdCombatPose = Blocking || (actionInProgress && desiredVelocity.sqrMagnitude < .04f &&
+                actualSpeed <= .2f && motor.isGrounded);
 
             if (animator && !hasVisualBaseRotation)
             {
@@ -437,7 +462,7 @@ namespace Riftbound
 
             // Visual strafe/diagonal alignment: turn the child mesh smoothly into strafe/backpedal motion while keeping actor transform.forward authoritative for camera/combat
             float desiredVisualYaw = 0f;
-            if (animator && !Mounted && !attacking && motor.isGrounded && actualSpeed > 0.2f)
+            if (animator && !Mounted && !holdCombatPose && motor.isGrounded && actualSpeed > 0.2f)
             {
                 float signedTravelAngle = Vector3.SignedAngle(transform.forward, planarVelocity.normalized, Vector3.up);
                 if (Mathf.Abs(signedTravelAngle) <= 105f) desiredVisualYaw = Mathf.Clamp(signedTravelAngle, -52f, 52f);
@@ -445,7 +470,7 @@ namespace Riftbound
             }
             if (animator)
             {
-                float lerpRate = attacking ? 28f : 14f;
+                float lerpRate = holdCombatPose ? 28f : 14f;
                 visualYawOffset = Mathf.Lerp(visualYawOffset, desiredVisualYaw, 1f - Mathf.Exp(-lerpRate * Time.deltaTime));
                 if (hasVisualBaseRotation)
                     animator.transform.localRotation = visualBaseRotation * Quaternion.Euler(0f, visualYawOffset, 0f);
@@ -456,7 +481,7 @@ namespace Riftbound
                 Play("Ride"); if (animator) animator.speed = 1;
                 mountInstance.Animate(actualSpeed, !motor.isGrounded, Walking);
             }
-            else if (!attacking)
+            else if (!holdCombatPose && !dodging)
             {
                 bool airborne = !motor.isGrounded;
                 bool movingBack = isBackpedaling || Vector3.Dot(planarVelocity, transform.forward) < -.15f;
@@ -478,49 +503,81 @@ namespace Riftbound
                     animator.speed = playback;
                 }
             }
-            if (bufferedAbilitySlot != 0)
-            {
-                if (Time.time >= bufferedAbilityExpiresAt || !Stats || !Stats.Alive || Blocking || AnyBlockingWindowOpen() || !Target || !Target.Alive)
-                    ClearCombatInputBuffer();
-                else if (bufferedAbilitySlot == 1 && Time.time >= attackReady && motor.isGrounded)
-                {
-                    ClearCombatInputBuffer();
-                    CastAbility1();
-                }
-            }
+            TickCombatInputBuffer();
 
             if (keys.digit1Key.wasPressedThisFrame) RequestPrimaryAttackInput();
-            if (keys.digit2Key.wasPressedThisFrame && !Blocking && !InventoryOpen && motor.isGrounded) CastAbility2();
-            if (keys.digit3Key.wasPressedThisFrame) CastAbility3();
+            if (keys.digit2Key.wasPressedThisFrame) RequestCombatAbility(2);
+            if (keys.digit3Key.wasPressedThisFrame) RequestCombatAbility(3);
+            if (keys.digit5Key.wasPressedThisFrame) CastMilestoneSlot(0);
+            if (keys.digit6Key.wasPressedThisFrame) CastMilestoneSlot(1);
             if (keys.fKey.wasPressedThisFrame && !Blocking && !InventoryOpen) CastInterruptPublic();
             if (keys.leftAltKey.wasPressedThisFrame && !Mounted && !InventoryOpen) PerformDodgeRoll(moveDirection);
             if (keys.eKey.wasPressedThisFrame) Interact();
         }
 
-        public void RequestPrimaryAttackInput()
+        public void RequestPrimaryAttackInput() => RequestCombatAbility(1);
+
+        bool CanUseCombatInput() => Stats && Stats.Alive && motor && motor.enabled && !Mounted &&
+            !Blocking && !PrototypeHUD.MenuOpen && !FrontendMenu.IsOpen && !(orbit && orbit.Paused) &&
+            !AnyBlockingWindowOpen();
+
+        bool HasAbilityFooting(int slot) => motor.isGrounded || slot == 3 || CharacterClass == "Mage" ||
+            (slot == 2 && (CharacterClass == "Paladin" || CharacterClass == "Rogue"));
+
+        float CombatAbilityReadyAt(int slot)
         {
-            if (!Stats || !Stats.Alive || Blocking || InventoryOpen || AnyBlockingWindowOpen() || (motor && !motor.isGrounded))
+            float cooldown = slot == 3 ? HealReady : slot == 2 ? Mathf.Max(attackReady, CleaveReady) : attackReady;
+            return Mathf.Max(cooldown, Mathf.Max(busyUntil, dodgeEnds));
+        }
+
+        void RequestCombatAbility(int slot)
+        {
+            if (!CanUseCombatInput() || !HasAbilityFooting(slot))
             {
                 ClearCombatInputBuffer();
                 return;
             }
-            if (Time.time >= attackReady)
+            float wait = CombatAbilityReadyAt(slot) - Time.time;
+            if (wait <= 0f)
             {
                 ClearCombatInputBuffer();
-                CastAbility1();
+                UseCombatAbility(slot);
+            }
+            else if (wait <= .35f)
+            {
+                bufferedAbilitySlot = slot;
+                bufferedAbilityExpiresAt = CombatAbilityReadyAt(slot) + .16f;
+            }
+            else if (slot != 1 && (slot == 2 ? CleaveReady : HealReady) > Time.time)
+                Message = $"Ability recharging ({Mathf.CeilToInt(wait)}s).";
+        }
+
+        void TickCombatInputBuffer()
+        {
+            int slot = bufferedAbilitySlot;
+            if (slot == 0) return;
+            if (!CanUseCombatInput() || Time.time >= bufferedAbilityExpiresAt ||
+                (slot == 1 && (!Target || !Target.Alive)))
+            {
+                ClearCombatInputBuffer();
                 return;
             }
-            if (attackReady - Time.time <= 0.35f)
-            {
-                bufferedAbilitySlot = 1;
-                bufferedAbilityExpiresAt = attackReady + 0.16f;
-            }
+            if (Time.time < CombatAbilityReadyAt(slot) || !HasAbilityFooting(slot)) return;
+            ClearCombatInputBuffer();
+            UseCombatAbility(slot);
+        }
+
+        void UseCombatAbility(int slot)
+        {
+            if (slot == 1) CastAbility1();
+            else if (slot == 2) CastAbility2();
+            else CastAbility3();
         }
 
         void PerformDodgeRoll(Vector3 inputDir)
         {
             if (Stats && !Stats.Alive) return;
-            if (Time.time < dodgeReadyTime) return;
+            if (Time.time < dodgeReadyTime || !motor || !motor.isGrounded || Blocking || AnyBlockingWindowOpen()) return;
             ClearCombatInputBuffer();
             bool wasMidAction = Time.time < busyUntil;
             combatActionEpoch++;
@@ -528,6 +585,7 @@ namespace Riftbound
             dodgeReadyTime = Time.time + 3.5f;
             dodgeEnds = Time.time + 0.32f;
             dodgeDir = inputDir.sqrMagnitude > 0.05f ? inputDir.normalized : transform.forward;
+            if (animator && animator.HasState(0, Animator.StringToHash("Dodge"))) Play("Dodge", true);
             if (Stats) Stats.invulnerableUntil = Time.time + 0.38f;
             if (Network.CoopSessionConfig.IsMultiplayer && Network.RiftboundCoopPlayer.LocalOwner != null)
             {
@@ -592,9 +650,9 @@ namespace Riftbound
                 Message = $"{Target.displayName} is not casting.";
             }
         }
-        public void CastAbility1Public() { if (!Blocking && !InventoryOpen && motor && motor.isGrounded) CastAbility1(); }
-        public void CastAbility2Public() { if (!Blocking && !InventoryOpen && motor && motor.isGrounded) CastAbility2(); }
-        public void CastAbility3Public() { CastAbility3(); }
+        public void CastAbility1Public() => RequestCombatAbility(1);
+        public void CastAbility2Public() => RequestCombatAbility(2);
+        public void CastAbility3Public() => RequestCombatAbility(3);
         public void UsePotionPublic() { UsePotion(); }
         public void ToggleMapPublic()
         {
@@ -691,6 +749,7 @@ namespace Riftbound
                     Message = "Target is out of range (28m). TAB selects the nearest target.";
                     return;
                 }
+                if (!CanSeeCombatTarget(Target)) { Message = "Something blocks your line of sight."; return; }
                 ClassResource -= 15;
                 var dir = Target.transform.position - transform.position; dir.y = 0;
                 if (dir.sqrMagnitude > .01f) transform.rotation = Quaternion.LookRotation(dir);
@@ -702,7 +761,7 @@ namespace Riftbound
                 if (Network.CoopSessionConfig.IsMultiplayer && Network.RiftboundCoopPlayer.LocalOwner != null)
                     Network.RiftboundCoopPlayer.LocalOwner.TriggerActionAnim("Cast", 0.60f);
                 AudioEffects.PlaySpellCast();
-                float dmg = 36 + (Level - 1) * 4 + WeaponBonus;
+                float dmg = (36 + (Level - 1) * 4 + WeaponBonus) * MilestoneDamageMultiplier;
                 if (CharacterRace == "Brute") dmg *= 1.15f;
                 FireballSpell.Cast(this, Target, dmg);
                 Message = "Fireball launched!";
@@ -715,6 +774,7 @@ namespace Riftbound
                     Message = "Move closer to an enemy. TAB selects the nearest target.";
                     return;
                 }
+                if (!CanSeeCombatTarget(Target)) { Message = "Something blocks your line of sight."; return; }
                 if (CharacterClass == "Rogue")
                 {
                     if (ClassResource < 40) { Message = "Not enough Energy!"; return; }
@@ -760,7 +820,7 @@ namespace Riftbound
                     if (Vector3.Distance(transform.position, enemy.transform.position) < 6.5f)
                     {
                         var eCombatant = enemy.GetComponent<Combatant>();
-                        if (!eCombatant || !eCombatant.Alive) continue;
+                        if (!eCombatant || !eCombatant.Alive || !CanSeeCombatTarget(eCombatant)) continue;
                         Hit(eCombatant, 32f, "frostnova");
                         BuffSystem.ApplyTargetDebuff(eCombatant, "frostbite", "Frostbite", "Movement slowed by 60%.", "❄", new Color(0.3f, 0.8f, 1f), 5f, 0f);
                     }
@@ -775,6 +835,7 @@ namespace Riftbound
                     Message = "Eviscerate requires a target in melee range.";
                     return;
                 }
+                if (!CanSeeCombatTarget(Target)) { Message = "Something blocks your line of sight."; return; }
                 ClassResource -= 35;
                 CleaveReady = Time.time + 4f;
                 attackReady = Time.time + 0.6f;
@@ -808,7 +869,7 @@ namespace Riftbound
                     if (Vector3.Distance(transform.position, enemy.transform.position) < 5.5f)
                     {
                         var eCombatant = enemy.GetComponent<Combatant>();
-                        if (!eCombatant || !eCombatant.Alive) continue;
+                        if (!eCombatant || !eCombatant.Alive || !CanSeeCombatTarget(eCombatant)) continue;
                         Hit(eCombatant, 40f, "consecration");
                         BuffSystem.ApplyTargetDebuff(eCombatant, "consecration", "Consecrated", "Sacred flame scorches the target.", "☼", new Color(1f, 0.85f, 0.35f), 5f, 0f);
                     }
@@ -926,7 +987,9 @@ namespace Riftbound
                 }
                 Message = string.IsNullOrEmpty(message) ? "Whirlwind!" : message;
             }
-            else if (victim && victim.Alive && Vector3.Distance(transform.position, victim.transform.position) < 3.5f && Vector3.Dot(transform.forward, (victim.transform.position - transform.position).normalized) > .1f)
+            else if (victim && victim.Alive && Vector3.Distance(transform.position, victim.transform.position) < 3.5f &&
+                Vector3.Dot(transform.forward, (victim.transform.position - transform.position).normalized) > .1f &&
+                CanSeeCombatTarget(victim))
             {
                 SpellFX.CreateSlashArc(transform.position, transform.forward, CharacterClass);
                 Hit(victim, damage, "melee");
@@ -934,7 +997,8 @@ namespace Riftbound
             }
             else
             {
-                Message = !victim || !victim.Alive ? "Target defeated." : "Target moved out of melee range.";
+                Message = !victim || !victim.Alive ? "Target defeated." :
+                    !CanSeeCombatTarget(victim) ? "Something blocks your strike." : "Target moved out of melee range.";
             }
         }
 
@@ -956,6 +1020,28 @@ namespace Riftbound
             }
             sprintTrail.emitting = active;
         }
+        bool CanSeeCombatTarget(Combatant enemy)
+        {
+            if (!enemy) return false;
+            Vector3 origin = transform.position + Vector3.up * Mathf.Clamp(EyeHeight * .78f, .8f, 1.4f);
+            Vector3 offset = enemy.transform.position + Vector3.up * 1.1f - origin;
+            if (offset.sqrMagnitude < .01f) return true;
+            int count = Physics.RaycastNonAlloc(origin, offset.normalized, combatSightHits, offset.magnitude,
+                ~(1 << 2), QueryTriggerInteraction.Ignore);
+            var hits = count == combatSightHits.Length
+                ? Physics.RaycastAll(origin, offset.normalized, offset.magnitude, ~(1 << 2), QueryTriggerInteraction.Ignore)
+                : combatSightHits;
+            if (hits != combatSightHits) count = hits.Length;
+            for (int i = 0; i < count; i++)
+            {
+                var hit = hits[i].collider;
+                if (!hit || hit.transform.IsChildOf(transform) || hit.transform.IsChildOf(enemy.transform) ||
+                    hit.GetComponentInParent<Combatant>()) continue;
+                return false;
+            }
+            return true;
+        }
+
         void Hit(Combatant enemy, float damage, string abilityId = "melee")
         {
             if (!enemy || !enemy.Alive) return;
@@ -964,18 +1050,23 @@ namespace Riftbound
                 Network.RiftboundCoopPlayer.LocalOwner.RequestAbilityAttack(enemy, abilityId);
                 return;
             }
+            if (!CanSeeCombatTarget(enemy)) return;
 
             float finalDmg = damage + (Level - 1) * 3 + WeaponBonus;
             if (CharacterRace == "Brute") finalDmg *= 1.15f;
             finalDmg *= TalentSystem.GetDamageMultiplier(this);
-            finalDmg *= WorldShrineSystem.GetDamageMultiplier();
+            finalDmg *= WorldShrineSystem.GetDamageMultiplier() * MilestoneDamageMultiplier;
 
-            float critChance = (CharacterClass == "Rogue" ? 0.28f : 0.16f) + WorldShrineSystem.GetCritBonus();
+            float critChance = (CharacterClass == "Rogue" ? 0.28f : 0.16f) + WorldShrineSystem.GetCritBonus() +
+                (HasMilestone("keen-eye") ? .08f : 0f);
             bool isCrit = UnityEngine.Random.value < critChance;
             if (isCrit) finalDmg *= 1.8f;
 
+            float healthBeforeHit = enemy.Health;
             enemy.Damage(finalDmg);
-            ApplyConfirmedHitPresentation(enemy, finalDmg, isCrit);
+            float damageDealt = healthBeforeHit - enemy.Health;
+            if (damageDealt <= 0f) return;
+            ApplyConfirmedHitPresentation(enemy, damageDealt, isCrit);
             if (CharacterRace == "Undead" && Stats && Stats.Alive) Stats.Heal(6);
         }
 
@@ -1008,7 +1099,7 @@ namespace Riftbound
 
             var candidates = FindObjectsByType<EnemyController>(FindObjectsSortMode.None)
                 .Select(e => e.GetComponent<Combatant>())
-                .Where(s => s != null && s.Alive && Vector3.Distance(transform.position, s.transform.position) < 28f)
+                .Where(s => s != null && s.Alive && Vector3.Distance(transform.position, s.transform.position) < 28f && CanSeeCombatTarget(s))
                 .ToList();
 
             if (candidates.Count == 0)
@@ -1150,21 +1241,27 @@ namespace Riftbound
         {
             if (!animator || (!force && currentAnimation == state)) return;
             if (!force && Locomotion(currentAnimation) && Locomotion(state))
-            {
-                var outgoing = animator.IsInTransition(0) ? animator.GetNextAnimatorStateInfo(0) : animator.GetCurrentAnimatorStateInfo(0);
-                float phase = outgoing.shortNameHash == Animator.StringToHash(currentAnimation)
-                    ? Mathf.Repeat(outgoing.normalizedTime - GaitPhase(currentAnimation) + GaitPhase(state), 1f)
-                    : GaitPhase(state);
-                animator.CrossFade(state, .14f, 0, phase);
-            }
-            else if (!force && Locomotion(state))
-                animator.CrossFade(state, .13f, 0, GaitPhase(state));
-            else
+                animator.CrossFadeInFixedTime(state, .16f, 0, 0);
+            else 
                 animator.CrossFadeInFixedTime(state, .14f, 0, 0);
             currentAnimation = state;
         }
         static bool Locomotion(string state) => state == "Walk" || state == "WalkBack" || state == "Run" || state == "RunBack";
         float GaitPhase(string state) => state == "Walk" ? walkPhase : state == "Run" ? runPhase : state == "WalkBack" ? backWalkPhase : backRunPhase;
+
+        void HoldMenuPosition()
+        {
+            moveVelocity = Vector3.zero;
+            if (RidingFlyingMount && Stats && Stats.Alive)
+            {
+                vertical = 0f;
+                Play("Ride");
+                mountInstance.Animate(0f, IsFlying, false);
+                return;
+            }
+            GravityOnly();
+        }
+
         void GravityOnly()
         {
             jumpInput.Reset(); ClearCombatInputBuffer();

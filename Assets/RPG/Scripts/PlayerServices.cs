@@ -149,6 +149,13 @@ namespace Riftbound
                 });
             }
 
+            if (CanUseWesternRoadQuest && WesternRoadStage == 1 && WesternRoadCamps.Current is var westernCamps && westernCamps)
+            {
+                float distance = Vector3.Distance(pos, westernCamps.Waybill.position);
+                if (distance <= 3f)
+                    Consider(distance, WesternRoadCamps.WaybillSecured(this) ? "Recover wagon waybill" : "Waybill guarded by raiders", RecoverWesternWaybill);
+            }
+
             if (CanTalk())
             {
                 var qGiver = questGiver.GetComponent<QuestGiver>();
@@ -217,6 +224,17 @@ namespace Riftbound
                         townNpc.TriggerGreetingBark(this, explicitInteract: true);
                     }
                 });
+            }
+
+            var hollows = BrassHollows.Current;
+            if (hollows && hollows.TryInteraction(this, out var caveAction))
+                Consider(caveAction.distance, caveAction.text, caveAction.execute);
+
+            foreach (var stop in SettlementWaystop.Active)
+            {
+                float distance = Vector3.Distance(pos, stop.transform.position);
+                if (distance < 3f)
+                    Consider(distance, $"Read {stop.displayName} notice", () => Message = stop.notice);
             }
 
             if (hasCandidate) { best = winner; return true; }

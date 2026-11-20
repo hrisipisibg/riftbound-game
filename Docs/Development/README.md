@@ -6,6 +6,8 @@ Use Unity6000.6.2f1 and the package versions pinned under Packages. Open the exp
 
 The Riftbound editor menu contains Windows build commands. The multiplayer presentation build methods are `Riftbound.Editor.CoopPrefabSetup.BuildMultiplayerPolish01` and `BuildMultiplayerPolish02`. They write complete standalone folders under Builds; distribute the whole folder rather than the executable alone. Existing build directories are protected from accidental replacement by the build helpers.
 
+For a new gameplay candidate, the isolated batch entrypoint is `Riftbound.Editor.GameplayCandidateBuild.Run`. It defaults to `Builds/RiftboundGameplayRefinement01`; pass `-gameplayBuildName <new-folder-name>` for a later candidate. Existing outputs are rejected. The build checks the protected Reaver terrain/collider and vegetation counts, then verifies that the saved scene and terrain bytes stayed unchanged. Record the actual clean source commit and binary/content hashes alongside the resulting complete folder.
+
 ## Source and assets
 
 Runtime code is under Assets/RPG/Scripts; editor checks and preparation tools are under Assets/RPG/Editor. Scene placement, terrain, prefab identity and `.meta` GUIDs are part of the authored game. Do not recreate actors or regenerate terrain to repair a local issue.

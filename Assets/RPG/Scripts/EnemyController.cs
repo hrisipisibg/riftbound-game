@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Riftbound
 {
     [RequireComponent(typeof(CharacterController), typeof(Combatant))]
-    public class EnemyController : MonoBehaviour
+    public partial class EnemyController : MonoBehaviour
     {
         public static readonly Dictionary<string, EnemyController> AllByKey = new Dictionary<string, EnemyController>();
         public string NetworkKey => !string.IsNullOrEmpty(enemyId) ? enemyId : gameObject.name;
@@ -88,12 +88,14 @@ namespace Riftbound
         void OnEnable()
         {
             wasChasing = false;
+            ResetNavigation();
             if (resetPoseOnEnable) ResetIdlePose();
         }
         public void ResetForLoad()
         {
             Initialize();
             CancelAttack(); dying = false; evading = false;
+            ResetNavigation();
             remoteActiveAction = 0; remoteActionUntil = 0f; lastRemoteActionSeq = 0;
             nextAttack = nextHeavy = deathTime = damageAt = 0;
             motor.enabled = false;
@@ -152,6 +154,7 @@ namespace Riftbound
         {
             bool hadActive = pendingDamage || heavyUntil > 0f || (warning && warning.enabled);
             heavyUntil = 0; pendingDamage = false; attackEnds = 0;
+            committedTarget = null;
             activeSpellName = ""; activeSpellIcon = "";
             if (warning) warning.enabled = false;
             CastBarSystem.CancelTargetCast(stats);
@@ -500,11 +503,17 @@ namespace Riftbound
                 }
             }
 
-            if (!targetTransform) { CancelAttack(); return; }
+            if (!targetTransform) { CancelAttack(); ResetNavigation(); return; }
             motor.Move(Vector3.down * 4 * Time.deltaTime);
             float range = Vector3.Distance(transform.position, targetTransform.position);
             float homeDistance = Vector3.Distance(transform.position, home);
-            bool inPursuitRange = targetAlive && range < 14 && Vector3.Distance(home, targetTransform.position) < 25;
+            bool hasSight = targetAlive && range <= 19f &&
+                HasUnobstructedSightLine(transform.position + Vector3.up * 1.1f, targetTransform);
+            if (hasSight || Time.time - stats.LastHit < .3f) pursuitUntil = Time.time + 1.8f;
+            bool inPursuitRange = targetAlive && range < (wasChasing ? 19f : 14f) &&
+                Mathf.Abs(targetTransform.position.y - transform.position.y) <= 4.5f &&
+                Vector3.Distance(home, targetTransform.position) < 25 &&
+                (hasSight || Time.time - stats.LastHit < .3f || wasChasing && Time.time < pursuitUntil);
             if (!inPursuitRange && homeDistance > 1.2f) evading = true;
             if (evading && homeDistance <= 1.2f) { evading = false; stats.Restore(); }
             bool chasing = inPursuitRange && !evading;
@@ -530,7 +539,7 @@ namespace Riftbound
                 }
             }
             wasChasing = chasing;
-            if (!chasing) CancelAttack();
+            if (!chasing || committedTarget && committedTarget != targetTransform) CancelAttack();
             if (heavyUntil > 0)
             {
                 if (CastBarSystem.GetTargetCast(stats) is var tCast && tCast != null && tCast.isInterrupted)
@@ -592,7 +601,7 @@ namespace Riftbound
                         EnemyProjectile.Launch(transform.position + Vector3.up * 1.25f, player, attackDamage);
                     }
                 }
-                else if (targetAlive && !ranged && range < 2.8f && ClearSightForTarget(targetTransform))
+                else if (targetAlive && !ranged && range < attackRange + .55f && ClearSightForTarget(targetTransform))
                 {
                     if (targetIsRemote)
                     {
@@ -610,7 +619,13 @@ namespace Riftbound
                 }
             }
             if (Time.time < attackEnds) return;
-            if ((isBoss || heavyAttacker) && chasing && range < 7 && Time.time >= nextHeavy) { HeavyAttack(); return; }
+            committedTarget = null;
+            if ((isBoss || heavyAttacker) && chasing && hasSight && range < 7 && Time.time >= nextHeavy)
+            {
+                committedTarget = targetTransform;
+                HeavyAttack();
+                return;
+            }
             Vector3 destination = chasing ? targetTransform.position : home;
             if (!chasing && Vector3.Distance(transform.position, home) > 1.2f)
             {
@@ -619,7 +634,7 @@ namespace Riftbound
                     stats.Heal(stats.maxHealth * Time.deltaTime * 0.45f);
             }
             var direction = destination - transform.position; direction.y = 0;
-            if (chasing && range < attackRange)
+            if (chasing && hasSight && range < attackRange)
             {
                 FacePoint(targetTransform.position);
                 if (Time.time >= nextAttack)
@@ -629,6 +644,7 @@ namespace Riftbound
                     damageAt = Time.time + (ranged ? attackDuration * 0.85f : attackDuration * .45f);
                     if (animator) animator.speed = 1;
                     pendingDamage = true; Play("Attack", true, "Idle");
+                    committedTarget = targetTransform;
                     string spellName = ""; string icon = "";
                     if (ranged)
                     {
@@ -643,18 +659,24 @@ namespace Riftbound
                 }
                 else { Play("Idle", false, "Default"); if (animator) animator.speed = 1; }
             }
-            else if (direction.magnitude > .6f)
+            else if (direction.sqrMagnitude > .36f)
             {
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 7);
                 float speed = (chasing ? (player ? player.runSpeed : 6f) : (player ? player.walkSpeed : 3.2f)) * movementMultiplier;
                 var previousPosition = transform.position;
-                motor.Move(direction.normalized * speed * Time.deltaTime);
+                direction = SteerTowards(destination, speed, chasing ? targetTransform : null, !chasing);
+                if (direction.sqrMagnitude > .01f)
+                {
+                    FacePoint(transform.position + direction);
+                    motor.Move(direction * Mathf.Min(speed * Time.deltaTime, Vector3.Distance(transform.position, destination)));
+                }
                 var travelled = transform.position - previousPosition; travelled.y = 0;
+                if (evading && TryRecoverReturn(travelled, targetTransform)) return;
                 Play(travelled.sqrMagnitude > .000001f ? (chasing ? "Run" : "Walk") : "Idle");
                 float stride = chasing
                     ? (runStrideSpeed > 0 ? runStrideSpeed : (player ? player.runStrideSpeed : 4.2f))
                     : (walkStrideSpeed > 0 ? walkStrideSpeed : (player ? player.walkStrideSpeed : 0.9f));
-                if (animator) animator.speed = Mathf.Clamp(travelled.magnitude / Mathf.Max(.001f, Time.deltaTime * stride), .65f, 2.25f);
+                if (animator) animator.speed = travelled.sqrMagnitude <= .000001f ? 1f :
+                    Mathf.Clamp(travelled.magnitude / Mathf.Max(.001f, Time.deltaTime * stride), .65f, 2.25f);
             }
             else
             {
@@ -705,12 +727,15 @@ namespace Riftbound
             if (!target) return false;
             Vector3 delta = target.position + Vector3.up - origin;
             if (delta.sqrMagnitude < 0.0001f) return true;
-            return !Physics.Raycast(origin, delta.normalized, out var hit, delta.magnitude, ~(1 << 2), QueryTriggerInteraction.Ignore) ||
-                hit.collider.GetComponentInParent<PlayerController>() != null ||
-                hit.collider.GetComponentInParent<Network.RiftboundCoopPlayer>() != null ||
-                hit.collider.transform.IsChildOf(target);
+            int count = Physics.RaycastNonAlloc(origin, delta.normalized, sightHits, delta.magnitude, WorldCollision, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < count; i++)
+            {
+                var hit = sightHits[i].collider;
+                if (hit is CharacterController || hit.transform.IsChildOf(transform) || hit.transform.IsChildOf(target)) continue;
+                return false;
+            }
+            return count < sightHits.Length;
         }
-        bool ClearSight() => ClearSightForTarget(player ? player.transform : null);
         bool ClearSightForTarget(Transform target)
         {
             Transform t = target ? target : (player ? player.transform : null);

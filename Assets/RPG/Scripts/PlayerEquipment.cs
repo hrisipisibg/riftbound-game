@@ -63,7 +63,10 @@ namespace Riftbound
             {
                 GemSocketSystem.Instance.GetTotalEquippedGemStats(out _, out _, out gemHp, out gemArmor, out _);
             }
-            Stats.ConfigureVitals(150 + (Level - 1) * 20 + health + raceHpBonus + gemHp, ArmorRating + raceArmorBonus + gemArmor);
+            int levelHealth = (Mathf.Min(Level, 5) - 1) * 20 + Mathf.Max(0, Level - 5) * 5;
+            var (specHealth, specArmor) = TalentSystem.GetSpecializationVitals(this);
+            Stats.ConfigureVitals(150 + levelHealth + health + raceHpBonus + gemHp + MilestoneHealth + specHealth,
+                ArmorRating + raceArmorBonus + gemArmor + MilestoneArmor + specArmor);
             if (!animator || Weapon == null) return;
             var block = new MaterialPropertyBlock();
             Color tint = Weapon.rarity == "Legendary" ? new Color(1.0f, 0.65f, 0.2f) :

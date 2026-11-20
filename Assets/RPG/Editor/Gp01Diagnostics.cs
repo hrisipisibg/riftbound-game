@@ -257,9 +257,24 @@ namespace Riftbound.Editor
                     SendMouse(false);
                     Assert(strafeDelta.magnitude > 0.6f && Vector3.Dot(strafeDelta.normalized, pc.transform.right) < -0.7f, $"GP02 RMB+A strafes left ({strafeDelta.magnitude:F2}m)");
                     Assert(visualAngle > 20f, $"GP01 Strafe aligns visual mesh into travel direction ({visualAngle:F1} deg)");
-                    // Test Turn-in-place with A alone
-                    yawStart = pc.transform.eulerAngles.y;
+                    // A now moves laterally on foot. Arrow keys keep keyboard turning.
+                    pStart = pc.transform.position;
+                    var left = Quaternion.Euler(0f, pc.orbit.Yaw, 0f) * Vector3.left;
+                    yawStart = Mathf.Atan2(left.x, left.z) * Mathf.Rad2Deg;
                     SendKeys(Key.A);
+                    playStage = 80;
+                    dueAt = EditorApplication.timeSinceStartup + 0.35;
+                    return;
+                }
+                if (playStage == 80)
+                {
+                    Vector3 delta = pc.transform.position - pStart;
+                    delta.y = 0;
+                    Vector3 expected = Quaternion.Euler(0, yawStart, 0) * Vector3.forward;
+                    Assert(delta.magnitude > .4f && Vector3.Dot(delta.normalized, expected) > .7f,
+                        $"GP02 A moves left without right mouse ({delta.magnitude:F2}m)");
+                    yawStart = pc.transform.eulerAngles.y;
+                    SendKeys(Key.LeftArrow);
                     playStage = 8;
                     dueAt = EditorApplication.timeSinceStartup + 0.35;
                     return;
@@ -377,7 +392,9 @@ namespace Riftbound.Editor
                     // GP05: MinimapRadar Main Quest tracking
                     Assert(MinimapRadar.Instance != null, "GP05 MinimapRadar active");
                     MinimapRadar.Instance.TrackMainQuest();
-                    Assert(MinimapRadar.Instance.TrackingMainQuest && MinimapRadar.Instance.customWaypoint.HasValue, "GP05 TrackMainQuest sets active objective waypoint");
+                    Assert(MinimapRadar.Instance.TrackingMainQuest &&
+                        MinimapRadar.Instance.TryGetNavigationTarget(out var objective, out _) && objective == pc.ObjectivePosition,
+                        "GP05 Main quest tracking points at the live objective");
                     MinimapRadar.ClearWaypoint();
 
                     // GP09: PartySystem opt-in companion spawn & dismiss
@@ -389,6 +406,11 @@ namespace Riftbound.Editor
                     Assert(PartySystem.Instance.Members.Count == 0, "GP09 KickMember cleanly removes companion");
 
                     // GP10: Class abilities, non-doubled scaling, dead-corpse guard, and Paladin Consecration debuff
+                    var combatMotor = pc.GetComponent<CharacterController>();
+                    combatMotor.enabled = false;
+                    pc.transform.SetPositionAndRotation(new Vector3(0, .25f, -12f), Quaternion.identity);
+                    combatMotor.enabled = true;
+                    combatMotor.Move(Vector3.down * .5f);
                     var liveGo = new GameObject("Gp10TempLiveEnemy");
                     liveGo.transform.position = pc.transform.position + pc.transform.forward * 2.5f;
                     var liveCbt = liveGo.AddComponent<Combatant>();
@@ -411,8 +433,10 @@ namespace Riftbound.Editor
                     var resProp = typeof(PlayerController).GetProperty("ClassResource");
                     var cleaveProp = typeof(PlayerController).GetProperty("CleaveReady");
                     var atkReadyField = typeof(PlayerController).GetField("attackReady", BindingFlags.NonPublic | BindingFlags.Instance);
+                    var recoveryField = typeof(PlayerController).GetField("busyUntil", BindingFlags.NonPublic | BindingFlags.Instance);
 
                     pc.CharacterClass = "Paladin";
+                    recoveryField.SetValue(pc, 0f);
                     resProp.SetValue(pc, 5f);
                     cleaveProp.SetValue(pc, 0f);
                     atkReadyField.SetValue(pc, 0f);
@@ -423,6 +447,7 @@ namespace Riftbound.Editor
                     Assert(consDmg >= 35f && consDmg <= 85f, $"GP10 Consecration avoids double Weapon/Level scaling (dmg={consDmg:F1})");
 
                     pc.CharacterClass = "Mage";
+                    recoveryField.SetValue(pc, 0f);
                     resProp.SetValue(pc, 100f);
                     cleaveProp.SetValue(pc, 0f);
                     atkReadyField.SetValue(pc, 0f);
@@ -431,6 +456,7 @@ namespace Riftbound.Editor
 
                     var targetProp = typeof(PlayerController).GetProperty("Target");
                     pc.CharacterClass = "Rogue";
+                    recoveryField.SetValue(pc, 0f);
                     resProp.SetValue(pc, 100f);
                     cleaveProp.SetValue(pc, 0f);
                     atkReadyField.SetValue(pc, 0f);

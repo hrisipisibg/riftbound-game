@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3a52ea7d331cbe4eb03e55b96278a07, type: 3}
+  m_Name: ProceduralActorCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::Riftbound.ProceduralActorCatalog
+  alliance:
+  - {fileID: 2184603546356927655, guid: 62e67e8a7c596514bb55246e93dcc6d7, type: 3}
+  - {fileID: 3936801629303109793, guid: 2a34fcc3d32e5a34a91ff2e18250a4c4, type: 3}
+  - {fileID: 5749180297434993992, guid: 3b3a463ad4eb5c548b4746375ddd5d96, type: 3}
+  - {fileID: 6067334394216837175, guid: c683cb0b2399b9642ba1b25bcc7dc621, type: 3}
+  horde:
+  - {fileID: 5522787830754180359, guid: 8ea3f9251a6331d4bb5cc14152317ecb, type: 3}
+  - {fileID: 7487731329663297579, guid: 13e51d7e8f4882042a5bfaee101abc94, type: 3}
+  - {fileID: 2280466168285122278, guid: 7fad78d7dc4f6964ca73cdb2901270ad, type: 3}
+  - {fileID: 5693212729487460282, guid: 2150355266ee6954a93bf8672db3e154, type: 3}
+  brute: {fileID: 8092781982257196640, guid: e3581603ce83aeb4eb3cda7cb7564e98, type: 3}
+  goblin: {fileID: 3714436107993341, guid: 607dc0ea82be4984281b4819e61aa232, type: 3}
+  sentinel: {fileID: 7842763220142162139, guid: fc74e605330631c4699615ae476e1991, type: 3}
+  wraith: {fileID: 5101308737415218623, guid: e6a3c3bc1a729464a89e04e9c829272b, type: 3}
+  smith: {fileID: 2990852363215528208, guid: 8a05c3f26699ce64594b51776255d610, type: 3}
+  scout: {fileID: 3715636954725070626, guid: 975e11581967cec479eb68cc7fc0cc4d, type: 3}
+  merchant: {fileID: 3257701857763977140, guid: 7ce2c8893d68bbc4dbc8058c9248e4ae, type: 3}

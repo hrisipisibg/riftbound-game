@@ -1,0 +1,2909 @@
+{
+  "seed": 4069,
+  "assets": [
+    {
+      "name": "Timber Cottage",
+      "file": "Timber_Cottage.fbx",
+      "kind": "static",
+      "triangles": [
+        13126,
+        6350,
+        790
+      ]
+    },
+    {
+      "name": "Wayfarer Inn",
+      "file": "Wayfarer_Inn.fbx",
+      "kind": "static",
+      "triangles": [
+        15886,
+        8630,
+        1102
+      ]
+    },
+    {
+      "name": "Emberford Smithy",
+      "file": "Emberford_Smithy.fbx",
+      "kind": "static",
+      "triangles": [
+        13126,
+        6350,
+        838
+      ]
+    },
+    {
+      "name": "Bell Chapel",
+      "file": "Bell_Chapel.fbx",
+      "kind": "static",
+      "triangles": [
+        21442,
+        8378,
+        1022
+      ]
+    },
+    {
+      "name": "Briar Camp Hut",
+      "file": "Briar_Camp_Hut.fbx",
+      "kind": "static",
+      "triangles": [
+        9838,
+        4566,
+        638
+      ]
+    },
+    {
+      "name": "Briar Watchtower",
+      "file": "Briar_Watchtower.fbx",
+      "kind": "static",
+      "triangles": [
+        8392,
+        3548,
+        684
+      ]
+    },
+    {
+      "name": "Palisade",
+      "file": "Palisade.fbx",
+      "kind": "static",
+      "triangles": [
+        440,
+        312,
+        216
+      ]
+    },
+    {
+      "name": "Ashwater Bridge",
+      "file": "Ashwater_Bridge.fbx",
+      "kind": "static",
+      "triangles": [
+        2088,
+        1584,
+        468
+      ]
+    },
+    {
+      "name": "Stone Wall",
+      "file": "Stone_Wall.fbx",
+      "kind": "static",
+      "triangles": [
+        3000,
+        3000,
+        144
+      ]
+    },
+    {
+      "name": "Ruined Wall",
+      "file": "Ruined_Wall.fbx",
+      "kind": "static",
+      "triangles": [
+        1800,
+        1800,
+        132
+      ]
+    },
+    {
+      "name": "Stone Arch",
+      "file": "Stone_Arch.fbx",
+      "kind": "static",
+      "triangles": [
+        1260,
+        1260,
+        132
+      ]
+    },
+    {
+      "name": "Broken Arch",
+      "file": "Broken_Arch.fbx",
+      "kind": "static",
+      "triangles": [
+        960,
+        960,
+        96
+      ]
+    },
+    {
+      "name": "Timber Door",
+      "file": "Timber_Door.fbx",
+      "kind": "static",
+      "triangles": [
+        688,
+        680,
+        120
+      ]
+    },
+    {
+      "name": "Broken Door",
+      "file": "Broken_Door.fbx",
+      "kind": "static",
+      "triangles": [
+        420,
+        420,
+        60
+      ]
+    },
+    {
+      "name": "Lantern Window",
+      "file": "Lantern_Window.fbx",
+      "kind": "static",
+      "triangles": [
+        540,
+        540,
+        72
+      ]
+    },
+    {
+      "name": "Broken Window",
+      "file": "Broken_Window.fbx",
+      "kind": "static",
+      "triangles": [
+        268,
+        268,
+        76
+      ]
+    },
+    {
+      "name": "Slate Roof Module",
+      "file": "Slate_Roof_Module.fbx",
+      "kind": "static",
+      "triangles": [
+        6708,
+        1988,
+        180
+      ]
+    },
+    {
+      "name": "Collapsed Shed",
+      "file": "Collapsed_Shed.fbx",
+      "kind": "static",
+      "triangles": [
+        4332,
+        3156,
+        336
+      ]
+    },
+    {
+      "name": "Rubble",
+      "file": "Rubble.fbx",
+      "kind": "static",
+      "triangles": [
+        1320,
+        660,
+        84
+      ]
+    },
+    {
+      "name": "Barrel",
+      "file": "Barrel.fbx",
+      "kind": "static",
+      "triangles": [
+        844,
+        820,
+        172
+      ]
+    },
+    {
+      "name": "Supply Crate",
+      "file": "Supply_Crate.fbx",
+      "kind": "static",
+      "triangles": [
+        372,
+        372,
+        72
+      ]
+    },
+    {
+      "name": "Paving Tile",
+      "file": "Paving_Tile.fbx",
+      "kind": "static",
+      "triangles": [
+        60,
+        60,
+        12
+      ]
+    },
+    {
+      "name": "Briar Banner",
+      "file": "Briar_Banner.fbx",
+      "kind": "static",
+      "triangles": [
+        76,
+        60,
+        60
+      ]
+    },
+    {
+      "name": "Steel Sword",
+      "file": "Steel_Sword.fbx",
+      "kind": "weapon",
+      "triangles": [
+        336,
+        240,
+        116
+      ]
+    },
+    {
+      "name": "Field Dagger",
+      "file": "Field_Dagger.fbx",
+      "kind": "weapon",
+      "triangles": [
+        336,
+        240,
+        116
+      ]
+    },
+    {
+      "name": "Tideglass Runeblade",
+      "file": "Tideglass_Runeblade.fbx",
+      "kind": "weapon",
+      "triangles": [
+        412,
+        300,
+        176
+      ]
+    },
+    {
+      "name": "Gloam Crystal Staff",
+      "file": "Gloam_Crystal_Staff.fbx",
+      "kind": "weapon",
+      "triangles": [
+        268,
+        170,
+        132
+      ]
+    },
+    {
+      "name": "Brute War Club",
+      "file": "Brute_War_Club.fbx",
+      "kind": "weapon",
+      "triangles": [
+        148,
+        100,
+        72
+      ]
+    },
+    {
+      "name": "Fir Tree",
+      "file": "Fir_Tree.fbx",
+      "kind": "static",
+      "triangles": [
+        168,
+        128,
+        72
+      ]
+    },
+    {
+      "name": "Moss Rock",
+      "file": "Moss_Rock.fbx",
+      "kind": "static",
+      "triangles": [
+        436,
+        112,
+        36
+      ]
+    },
+    {
+      "name": "Street Lantern",
+      "file": "Street_Lantern.fbx",
+      "kind": "static",
+      "triangles": [
+        284,
+        268,
+        72
+      ]
+    },
+    {
+      "name": "Emberwatch Knight",
+      "file": "Emberwatch_Knight.fbx",
+      "kind": "hero",
+      "triangles": [
+        3856,
+        2996,
+        1316
+      ]
+    },
+    {
+      "name": "Emberwatch Mage",
+      "file": "Emberwatch_Mage.fbx",
+      "kind": "hero",
+      "triangles": [
+        3456,
+        2650,
+        1184
+      ]
+    },
+    {
+      "name": "Emberwatch Rogue",
+      "file": "Emberwatch_Rogue.fbx",
+      "kind": "hero",
+      "triangles": [
+        3768,
+        2952,
+        1200
+      ]
+    },
+    {
+      "name": "Emberwatch Paladin",
+      "file": "Emberwatch_Paladin.fbx",
+      "kind": "hero",
+      "triangles": [
+        3944,
+        3068,
+        1388
+      ]
+    },
+    {
+      "name": "Briar Knight",
+      "file": "Briar_Knight.fbx",
+      "kind": "rival",
+      "triangles": [
+        3936,
+        3044,
+        1340
+      ]
+    },
+    {
+      "name": "Briar Mage",
+      "file": "Briar_Mage.fbx",
+      "kind": "rival",
+      "triangles": [
+        3496,
+        2674,
+        1184
+      ]
+    },
+    {
+      "name": "Briar Rogue",
+      "file": "Briar_Rogue.fbx",
+      "kind": "rival",
+      "triangles": [
+        4016,
+        3108,
+        1272
+      ]
+    },
+    {
+      "name": "Briar Paladin",
+      "file": "Briar_Paladin.fbx",
+      "kind": "rival",
+      "triangles": [
+        4024,
+        3116,
+        1412
+      ]
+    },
+    {
+      "name": "Briar Brute",
+      "file": "Briar_Brute.fbx",
+      "kind": "enemy",
+      "triangles": [
+        3348,
+        2580,
+        1112
+      ]
+    },
+    {
+      "name": "Cutpurse Goblin",
+      "file": "Cutpurse_Goblin.fbx",
+      "kind": "enemy",
+      "triangles": [
+        3652,
+        2828,
+        1132
+      ]
+    },
+    {
+      "name": "Quarry Sentinel",
+      "file": "Quarry_Sentinel.fbx",
+      "kind": "enemy",
+      "triangles": [
+        4208,
+        3388,
+        1344
+      ]
+    },
+    {
+      "name": "Gloam Wraith",
+      "file": "Gloam_Wraith.fbx",
+      "kind": "enemy",
+      "triangles": [
+        3552,
+        2722,
+        1232
+      ]
+    },
+    {
+      "name": "Town Blacksmith",
+      "file": "Town_Blacksmith.fbx",
+      "kind": "npc",
+      "triangles": [
+        2812,
+        2172,
+        892
+      ]
+    },
+    {
+      "name": "Town Merchant",
+      "file": "Town_Merchant.fbx",
+      "kind": "npc",
+      "triangles": [
+        2780,
+        2176,
+        868
+      ]
+    },
+    {
+      "name": "Town Scout",
+      "file": "Town_Scout.fbx",
+      "kind": "npc",
+      "triangles": [
+        2732,
+        2128,
+        868
+      ]
+    },
+    {
+      "name": "Highspire Masonry Tower",
+      "file": "Highspire_Masonry_Tower.fbx",
+      "kind": "static",
+      "triangles": [
+        20600,
+        15748,
+        1332
+      ]
+    },
+    {
+      "name": "Highspire Citadel Hall",
+      "file": "Highspire_Citadel_Hall.fbx",
+      "kind": "static",
+      "triangles": [
+        80490,
+        9518,
+        1022
+      ]
+    },
+    {
+      "name": "Briar War Hall",
+      "file": "Briar_War_Hall.fbx",
+      "kind": "static",
+      "triangles": [
+        20402,
+        8418,
+        890
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "asset": "Wayfarer Inn",
+      "position": [
+        -12,
+        -0.0016,
+        7
+      ],
+      "yaw": 8,
+      "scale": 1.14
+    },
+    {
+      "asset": "Bell Chapel",
+      "position": [
+        -4,
+        -0.1044,
+        4
+      ],
+      "yaw": 8,
+      "scale": 1.16
+    },
+    {
+      "asset": "Emberford Smithy",
+      "position": [
+        9,
+        -0.0979,
+        10
+      ],
+      "yaw": -13,
+      "scale": 1.3
+    },
+    {
+      "asset": "Timber Cottage",
+      "position": [
+        14,
+        0.0172,
+        9
+      ],
+      "yaw": 9,
+      "scale": 1.14
+    },
+    {
+      "asset": "Timber Cottage",
+      "position": [
+        -19,
+        -0.1973,
+        14
+      ],
+      "yaw": 67,
+      "scale": 1.16
+    },
+    {
+      "asset": "Timber Cottage",
+      "position": [
+        -15,
+        -0.0082,
+        21
+      ],
+      "yaw": 161,
+      "scale": 1.22
+    },
+    {
+      "asset": "Timber Cottage",
+      "position": [
+        10,
+        -0.0125,
+        21
+      ],
+      "yaw": 158,
+      "scale": 1.08
+    },
+    {
+      "asset": "Timber Cottage",
+      "position": [
+        17,
+        0.1102,
+        18
+      ],
+      "yaw": -78,
+      "scale": 1.15
+    },
+    {
+      "asset": "Briar Watchtower",
+      "position": [
+        9,
+        -0.0153,
+        -21
+      ],
+      "yaw": -9,
+      "scale": 1.23
+    },
+    {
+      "asset": "Briar Watchtower",
+      "position": [
+        22,
+        -0.0907,
+        -24
+      ],
+      "yaw": -18,
+      "scale": 1.2
+    },
+    {
+      "asset": "Briar Camp Hut",
+      "position": [
+        12,
+        0.1765,
+        -29
+      ],
+      "yaw": -14,
+      "scale": 1.37
+    },
+    {
+      "asset": "Briar Camp Hut",
+      "position": [
+        19,
+        0.3563,
+        -32
+      ],
+      "yaw": 20,
+      "scale": 1.48
+    },
+    {
+      "asset": "Briar Camp Hut",
+      "position": [
+        24,
+        -0.0992,
+        -28
+      ],
+      "yaw": -43,
+      "scale": 1.25
+    },
+    {
+      "asset": "Collapsed Shed",
+      "position": [
+        -21,
+        -0.1819,
+        -13
+      ],
+      "yaw": 25,
+      "scale": 1.18
+    },
+    {
+      "asset": "Broken Arch",
+      "position": [
+        -15,
+        -0.0822,
+        -16
+      ],
+      "yaw": -11,
+      "scale": 1.38
+    },
+    {
+      "asset": "Stone Arch",
+      "position": [
+        -22,
+        -0.0518,
+        -20
+      ],
+      "yaw": 22,
+      "scale": 1.33
+    },
+    {
+      "asset": "Ruined Wall",
+      "position": [
+        -25,
+        0.0368,
+        -18
+      ],
+      "yaw": -42,
+      "scale": 1.33
+    },
+    {
+      "asset": "Ruined Wall",
+      "position": [
+        -16,
+        -0.0653,
+        -19
+      ],
+      "yaw": -19,
+      "scale": 1.1
+    },
+    {
+      "asset": "Stone Wall",
+      "position": [
+        -25,
+        0.033,
+        -11
+      ],
+      "yaw": 138,
+      "scale": 1.2
+    },
+    {
+      "asset": "Ashwater Bridge",
+      "position": [
+        2.5,
+        0.14,
+        -6.8293
+      ],
+      "yaw": 5,
+      "scale": 1.17
+    },
+    {
+      "asset": "Palisade",
+      "position": [
+        8,
+        -0.1059,
+        -18.7
+      ],
+      "yaw": 0,
+      "scale": 1
+    },
+    {
+      "asset": "Palisade",
+      "position": [
+        12,
+        -0.0291,
+        -18.7
+      ],
+      "yaw": 0,
+      "scale": 1
+    },
+    {
+      "asset": "Palisade",
+      "position": [
+        20,
+        0.1122,
+        -18.7
+      ],
+      "yaw": 0,
+      "scale": 1
+    },
+    {
+      "asset": "Palisade",
+      "position": [
+        24,
+        0.0563,
+        -18.7
+      ],
+      "yaw": 0,
+      "scale": 1
+    },
+    {
+      "asset": "Palisade",
+      "position": [
+        26,
+        0.1489,
+        -22
+      ],
+      "yaw": 90,
+      "scale": 1
+    },
+    {
+      "asset": "Palisade",
+      "position": [
+        26,
+        0.1427,
+        -26
+      ],
+      "yaw": 90,
+      "scale": 1
+    },
+    {
+      "asset": "Palisade",
+      "position": [
+        26,
+        0.3918,
+        -30
+      ],
+      "yaw": 90,
+      "scale": 1
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        -11,
+        0.096,
+        14
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        -6,
+        0.1979,
+        14
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        4,
+        -0.1635,
+        14
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        13,
+        -0.0041,
+        13
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        -3,
+        -0.1193,
+        2
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        7,
+        0.198,
+        0.4
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        3,
+        -0.1267,
+        -13
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        7,
+        -0.1643,
+        -17
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        -17,
+        0.055,
+        23
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Street Lantern",
+      "position": [
+        3,
+        0.0709,
+        24
+      ],
+      "yaw": 0,
+      "scale": 1.12
+    },
+    {
+      "asset": "Briar Banner",
+      "position": [
+        10,
+        -0.0923,
+        -18
+      ],
+      "yaw": -10,
+      "scale": 1.12
+    },
+    {
+      "asset": "Briar Banner",
+      "position": [
+        16,
+        0.0653,
+        -19
+      ],
+      "yaw": -10,
+      "scale": 1.12
+    },
+    {
+      "asset": "Briar Banner",
+      "position": [
+        24,
+        0.0092,
+        -21
+      ],
+      "yaw": -10,
+      "scale": 1.12
+    },
+    {
+      "asset": "Town Merchant",
+      "position": [
+        -8.4,
+        0.0532,
+        8.5
+      ],
+      "yaw": 20,
+      "scale": 1
+    },
+    {
+      "asset": "Town Blacksmith",
+      "position": [
+        7.1,
+        -0.1904,
+        13
+      ],
+      "yaw": 2,
+      "scale": 1
+    },
+    {
+      "asset": "Town Scout",
+      "position": [
+        -3.5,
+        0.1431,
+        13
+      ],
+      "yaw": -14,
+      "scale": 1
+    },
+    {
+      "asset": "Emberwatch Knight",
+      "position": [
+        3.4,
+        0.1428,
+        0.9
+      ],
+      "yaw": -17,
+      "scale": 1
+    },
+    {
+      "asset": "Emberwatch Paladin",
+      "position": [
+        1.0,
+        0.0426,
+        2.1
+      ],
+      "yaw": -31,
+      "scale": 1
+    },
+    {
+      "asset": "Briar Brute",
+      "position": [
+        15.2,
+        -0.0429,
+        -23.5
+      ],
+      "yaw": 11,
+      "scale": 1
+    },
+    {
+      "asset": "Cutpurse Goblin",
+      "position": [
+        20,
+        -0.1685,
+        -26
+      ],
+      "yaw": -12,
+      "scale": 1
+    },
+    {
+      "asset": "Briar Knight",
+      "position": [
+        12.9,
+        -0.0012,
+        -20.8
+      ],
+      "yaw": 7,
+      "scale": 1
+    },
+    {
+      "asset": "Gloam Wraith",
+      "position": [
+        -20,
+        -0.1646,
+        -17
+      ],
+      "yaw": -7,
+      "scale": 1
+    },
+    {
+      "asset": "Quarry Sentinel",
+      "position": [
+        -22,
+        0.0215,
+        -22
+      ],
+      "yaw": 16,
+      "scale": 1
+    },
+    {
+      "asset": "Supply Crate",
+      "position": [
+        -13,
+        0.0025,
+        10
+      ],
+      "yaw": -18,
+      "scale": 0.89
+    },
+    {
+      "asset": "Barrel",
+      "position": [
+        -12.05,
+        0.027,
+        9.77
+      ],
+      "yaw": 7,
+      "scale": 0.86
+    },
+    {
+      "asset": "Supply Crate",
+      "position": [
+        -10.4,
+        0.0729,
+        10.1
+      ],
+      "yaw": -18,
+      "scale": 0.89
+    },
+    {
+      "asset": "Barrel",
+      "position": [
+        -9.45,
+        0.0867,
+        9.87
+      ],
+      "yaw": 7,
+      "scale": 0.86
+    },
+    {
+      "asset": "Supply Crate",
+      "position": [
+        11,
+        -0.0843,
+        12
+      ],
+      "yaw": -18,
+      "scale": 0.89
+    },
+    {
+      "asset": "Barrel",
+      "position": [
+        11.95,
+        -0.046,
+        11.77
+      ],
+      "yaw": 7,
+      "scale": 0.86
+    },
+    {
+      "asset": "Supply Crate",
+      "position": [
+        -18,
+        -0.1825,
+        15
+      ],
+      "yaw": -18,
+      "scale": 0.89
+    },
+    {
+      "asset": "Barrel",
+      "position": [
+        -17.05,
+        -0.1618,
+        14.77
+      ],
+      "yaw": 7,
+      "scale": 0.86
+    },
+    {
+      "asset": "Supply Crate",
+      "position": [
+        20,
+        -0.1412,
+        -25
+      ],
+      "yaw": -18,
+      "scale": 0.89
+    },
+    {
+      "asset": "Barrel",
+      "position": [
+        20.95,
+        -0.1413,
+        -25.23
+      ],
+      "yaw": 7,
+      "scale": 0.86
+    },
+    {
+      "asset": "Supply Crate",
+      "position": [
+        21,
+        -0.0635,
+        -29
+      ],
+      "yaw": -18,
+      "scale": 0.89
+    },
+    {
+      "asset": "Barrel",
+      "position": [
+        21.95,
+        -0.0143,
+        -29.23
+      ],
+      "yaw": 7,
+      "scale": 0.86
+    },
+    {
+      "asset": "Supply Crate",
+      "position": [
+        11,
+        0.0906,
+        -27
+      ],
+      "yaw": -18,
+      "scale": 0.89
+    },
+    {
+      "asset": "Barrel",
+      "position": [
+        11.95,
+        0.0517,
+        -27.23
+      ],
+      "yaw": 7,
+      "scale": 0.86
+    },
+    {
+      "asset": "Supply Crate",
+      "position": [
+        6,
+        -0.0373,
+        8
+      ],
+      "yaw": -18,
+      "scale": 0.89
+    },
+    {
+      "asset": "Barrel",
+      "position": [
+        6.95,
+        -0.0275,
+        7.77
+      ],
+      "yaw": 7,
+      "scale": 0.86
+    },
+    {
+      "asset": "Rubble",
+      "position": [
+        -22,
+        -0.1266,
+        -11
+      ],
+      "yaw": 29,
+      "scale": 1.0
+    },
+    {
+      "asset": "Rubble",
+      "position": [
+        -15,
+        -0.0883,
+        -14
+      ],
+      "yaw": 29,
+      "scale": 1.0
+    },
+    {
+      "asset": "Rubble",
+      "position": [
+        -20,
+        -0.1011,
+        -19
+      ],
+      "yaw": 29,
+      "scale": 1.0
+    },
+    {
+      "asset": "Rubble",
+      "position": [
+        -27,
+        0.2517,
+        -18
+      ],
+      "yaw": 29,
+      "scale": 1.0
+    },
+    {
+      "asset": "Rubble",
+      "position": [
+        20,
+        0.5135,
+        -33
+      ],
+      "yaw": 29,
+      "scale": 1.0
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -36.7298,
+        0.8517,
+        26.5054
+      ],
+      "yaw": 62,
+      "scale": 0.865
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -29.191,
+        0.2574,
+        28.8756
+      ],
+      "yaw": 268,
+      "scale": 1.361
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -35.6018,
+        0.7517,
+        25.4009
+      ],
+      "yaw": 145,
+      "scale": 1.004
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -27.5906,
+        0.2032,
+        28.1259
+      ],
+      "yaw": 322,
+      "scale": 1.568
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -30.0743,
+        0.3929,
+        23.2392
+      ],
+      "yaw": 280,
+      "scale": 1.584
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -37.6919,
+        1.0299,
+        21.2324
+      ],
+      "yaw": 282,
+      "scale": 0.835
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -28.0844,
+        0.2704,
+        23.3284
+      ],
+      "yaw": 317,
+      "scale": 1.343
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -31.9085,
+        0.5912,
+        21.464
+      ],
+      "yaw": 220,
+      "scale": 0.99
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -24.359,
+        0.0074,
+        20.3634
+      ],
+      "yaw": 252,
+      "scale": 1.12
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -36.5126,
+        0.8535,
+        24.8896
+      ],
+      "yaw": 221,
+      "scale": 0.932
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -30.7721,
+        0.3299,
+        28.8879
+      ],
+      "yaw": 355,
+      "scale": 1.33
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -36.0028,
+        0.9987,
+        17.9114
+      ],
+      "yaw": 358,
+      "scale": 1.087
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -25.8952,
+        0.1556,
+        27.8555
+      ],
+      "yaw": 216,
+      "scale": 1.471
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        35.6862,
+        0.7437,
+        11.9888
+      ],
+      "yaw": 104,
+      "scale": 1.11
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        35.0381,
+        0.6654,
+        12.9235
+      ],
+      "yaw": 203,
+      "scale": 1.646
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        31.5945,
+        0.3804,
+        13.4079
+      ],
+      "yaw": 47,
+      "scale": 1.524
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        32.0396,
+        0.4374,
+        11.6647
+      ],
+      "yaw": 95,
+      "scale": 0.928
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        35.9135,
+        0.8185,
+        9.6251
+      ],
+      "yaw": 292,
+      "scale": 0.942
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        33.8377,
+        0.5559,
+        15.8217
+      ],
+      "yaw": 303,
+      "scale": 1.374
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        37.8684,
+        0.9757,
+        13.293
+      ],
+      "yaw": 192,
+      "scale": 1.559
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        27.4988,
+        0.208,
+        16.5876
+      ],
+      "yaw": 237,
+      "scale": 1.482
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        27.2053,
+        0.2338,
+        20.8057
+      ],
+      "yaw": 293,
+      "scale": 1.466
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        34.4972,
+        0.609,
+        15.219
+      ],
+      "yaw": 136,
+      "scale": 1.496
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        28.316,
+        0.2911,
+        19.8809
+      ],
+      "yaw": 27,
+      "scale": 0.997
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        26.6665,
+        0.1768,
+        14.7857
+      ],
+      "yaw": 63,
+      "scale": 0.943
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        25.8638,
+        0.142,
+        20.7396
+      ],
+      "yaw": 137,
+      "scale": 1.321
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -26.0445,
+        0.5182,
+        -30.8739
+      ],
+      "yaw": 89,
+      "scale": 0.798
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -33.768,
+        1.1778,
+        -32.5515
+      ],
+      "yaw": 203,
+      "scale": 1.115
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -39.1896,
+        1.136,
+        -25.8429
+      ],
+      "yaw": 68,
+      "scale": 1.613
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -35.8534,
+        0.8116,
+        -28.5502
+      ],
+      "yaw": 96,
+      "scale": 1.127
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -39.5594,
+        1.7583,
+        -32.6622
+      ],
+      "yaw": 349,
+      "scale": 1.529
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -36.8356,
+        1.1765,
+        -30.5129
+      ],
+      "yaw": 0,
+      "scale": 1.309
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -28.798,
+        0.342,
+        -28.7964
+      ],
+      "yaw": 307,
+      "scale": 1.545
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -32.8567,
+        0.4661,
+        -27.9628
+      ],
+      "yaw": 186,
+      "scale": 1.424
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -36.2206,
+        1.3514,
+        -32.2195
+      ],
+      "yaw": 330,
+      "scale": 1.5
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -32.3369,
+        0.4705,
+        -25.4674
+      ],
+      "yaw": 236,
+      "scale": 0.891
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -37.4298,
+        1.1345,
+        -29.6809
+      ],
+      "yaw": 183,
+      "scale": 1.118
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -33.4054,
+        0.578,
+        -24.6087
+      ],
+      "yaw": 114,
+      "scale": 0.978
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -37.9208,
+        1.4251,
+        -31.4572
+      ],
+      "yaw": 251,
+      "scale": 0.894
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        28.5498,
+        0.6686,
+        -29.7882
+      ],
+      "yaw": 179,
+      "scale": 1.559
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        37.736,
+        1.6869,
+        -32.923
+      ],
+      "yaw": 62,
+      "scale": 1.035
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        34.4507,
+        0.9634,
+        -27.6696
+      ],
+      "yaw": 319,
+      "scale": 1.018
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        34.0668,
+        1.6187,
+        -34.5199
+      ],
+      "yaw": 156,
+      "scale": 0.951
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        41.6888,
+        1.3111,
+        -28.7522
+      ],
+      "yaw": 302,
+      "scale": 1.375
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        37.9106,
+        1.7276,
+        -33.207
+      ],
+      "yaw": 268,
+      "scale": 1.02
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        34.3242,
+        1.77,
+        -36.0935
+      ],
+      "yaw": 196,
+      "scale": 1.25
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        39.8319,
+        2.0046,
+        -34.5895
+      ],
+      "yaw": 204,
+      "scale": 1.332
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        33.6325,
+        1.0294,
+        -28.8977
+      ],
+      "yaw": 185,
+      "scale": 1.336
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        39.4086,
+        1.5801,
+        -31.4385
+      ],
+      "yaw": 127,
+      "scale": 1.003
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        35.757,
+        1.0181,
+        -26.6501
+      ],
+      "yaw": 171,
+      "scale": 1.152
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        38.5151,
+        2.2987,
+        -37.8099
+      ],
+      "yaw": 237,
+      "scale": 1.439
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        30.2841,
+        1.6073,
+        -37.6395
+      ],
+      "yaw": 339,
+      "scale": 1.614
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        0.5312,
+        2.4018,
+        -47.3265
+      ],
+      "yaw": 18,
+      "scale": 1.649
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -9.9908,
+        2.0087,
+        -42.9867
+      ],
+      "yaw": 158,
+      "scale": 1.3
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -12.5615,
+        1.5912,
+        -40.5522
+      ],
+      "yaw": 335,
+      "scale": 1.089
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -6.5195,
+        2.5127,
+        -47.1765
+      ],
+      "yaw": 173,
+      "scale": 1.243
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -2.191,
+        1.9092,
+        -42.4732
+      ],
+      "yaw": 272,
+      "scale": 0.936
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -6.9843,
+        2.1729,
+        -43.8296
+      ],
+      "yaw": 40,
+      "scale": 1.201
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -8.9606,
+        2.4737,
+        -46.9651
+      ],
+      "yaw": 75,
+      "scale": 1.088
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -6.1451,
+        1.7011,
+        -40.2652
+      ],
+      "yaw": 116,
+      "scale": 1.147
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -0.6503,
+        2.0108,
+        -43.8436
+      ],
+      "yaw": 47,
+      "scale": 1.291
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -2.641,
+        1.831,
+        -41.7286
+      ],
+      "yaw": 85,
+      "scale": 1.641
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -6.4948,
+        2.3178,
+        -45.1437
+      ],
+      "yaw": 305,
+      "scale": 0.976
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -0.7673,
+        1.7964,
+        -42.0822
+      ],
+      "yaw": 311,
+      "scale": 0.887
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        0.1065,
+        1.9258,
+        -43.4468
+      ],
+      "yaw": 152,
+      "scale": 1.279
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -0.1252,
+        0.2478,
+        -30.028
+      ],
+      "yaw": 149,
+      "scale": 1.491
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        42.8623,
+        1.4271,
+        7.5127
+      ],
+      "yaw": 38,
+      "scale": 1.263
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -30.9132,
+        2.9748,
+        -46.6895
+      ],
+      "yaw": 220,
+      "scale": 0.979
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -31.1434,
+        2.1177,
+        -39.5434
+      ],
+      "yaw": 11,
+      "scale": 0.977
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -16.6244,
+        1.6973,
+        -42.7788
+      ],
+      "yaw": 285,
+      "scale": 1.13
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        28.4421,
+        0.4014,
+        24.7001
+      ],
+      "yaw": 238,
+      "scale": 1.126
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        23.0201,
+        -0.1327,
+        29.7743
+      ],
+      "yaw": 301,
+      "scale": 0.957
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        11.0087,
+        0.0956,
+        -0.2784
+      ],
+      "yaw": 29,
+      "scale": 1.005
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -11.7467,
+        -0.0559,
+        30.7897
+      ],
+      "yaw": 68,
+      "scale": 0.847
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -29.224,
+        0.2738,
+        -28.1184
+      ],
+      "yaw": 244,
+      "scale": 0.974
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -41.1553,
+        1.3098,
+        5.9195
+      ],
+      "yaw": 324,
+      "scale": 1.214
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        17.0508,
+        -0.094,
+        32.9001
+      ],
+      "yaw": 58,
+      "scale": 0.716
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -46.3548,
+        1.5967,
+        19.5349
+      ],
+      "yaw": 25,
+      "scale": 0.827
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -33.7871,
+        1.1793,
+        -32.5507
+      ],
+      "yaw": 188,
+      "scale": 0.924
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        8.4374,
+        0.169,
+        -1.5774
+      ],
+      "yaw": 272,
+      "scale": 1.199
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -13.8851,
+        0.0355,
+        26.9139
+      ],
+      "yaw": 221,
+      "scale": 0.964
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -31.0437,
+        3.1517,
+        -48.5246
+      ],
+      "yaw": 208,
+      "scale": 1.002
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -32.0075,
+        0.6648,
+        19.9098
+      ],
+      "yaw": 82,
+      "scale": 1.342
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        41.3526,
+        1.2077,
+        27.5948
+      ],
+      "yaw": 30,
+      "scale": 1.298
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        21.1178,
+        -0.1772,
+        30.0744
+      ],
+      "yaw": 239,
+      "scale": 0.776
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -4.3089,
+        2.0794,
+        -43.2658
+      ],
+      "yaw": 196,
+      "scale": 1.021
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        2.492,
+        0.0692,
+        32.6932
+      ],
+      "yaw": 277,
+      "scale": 1.076
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        19.9094,
+        -0.1986,
+        28.9994
+      ],
+      "yaw": 194,
+      "scale": 1.247
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -26.0753,
+        0.1587,
+        24.4425
+      ],
+      "yaw": 331,
+      "scale": 0.942
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        41.945,
+        1.2506,
+        2.957
+      ],
+      "yaw": 279,
+      "scale": 1.331
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        27.3841,
+        0.2024,
+        12.2415
+      ],
+      "yaw": 104,
+      "scale": 1.02
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -36.0529,
+        1.0028,
+        17.84
+      ],
+      "yaw": 229,
+      "scale": 0.721
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        37.1091,
+        0.9456,
+        19.651
+      ],
+      "yaw": 166,
+      "scale": 0.695
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        36.5966,
+        2.9379,
+        -44.8136
+      ],
+      "yaw": 212,
+      "scale": 0.784
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -33.6233,
+        1.5519,
+        -34.9114
+      ],
+      "yaw": 192,
+      "scale": 0.812
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        37.3299,
+        2.3758,
+        -39.5459
+      ],
+      "yaw": 47,
+      "scale": 1.037
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -13.0804,
+        -0.0003,
+        31.9207
+      ],
+      "yaw": 350,
+      "scale": 0.841
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -44.043,
+        1.4581,
+        -20.2834
+      ],
+      "yaw": 332,
+      "scale": 0.939
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        42.876,
+        3.8736,
+        -46.8992
+      ],
+      "yaw": 273,
+      "scale": 0.989
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        33.4976,
+        2.7663,
+        -45.7027
+      ],
+      "yaw": 141,
+      "scale": 0.765
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -44.2754,
+        1.6719,
+        25.7203
+      ],
+      "yaw": 332,
+      "scale": 1.541
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        35.5681,
+        0.7224,
+        15.9225
+      ],
+      "yaw": 343,
+      "scale": 0.807
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        28.8451,
+        2.0613,
+        -42.5363
+      ],
+      "yaw": 163,
+      "scale": 1.535
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -33.7655,
+        0.6035,
+        -24.7293
+      ],
+      "yaw": 70,
+      "scale": 1.135
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        29.6482,
+        1.6644,
+        -38.6392
+      ],
+      "yaw": 107,
+      "scale": 1.308
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        36.1895,
+        0.8244,
+        -18.102
+      ],
+      "yaw": 115,
+      "scale": 0.927
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        4.5623,
+        1.939,
+        -44.8039
+      ],
+      "yaw": 132,
+      "scale": 0.859
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -44.3275,
+        2.7086,
+        -38.2781
+      ],
+      "yaw": 349,
+      "scale": 1.132
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -44.1806,
+        1.3962,
+        18.2937
+      ],
+      "yaw": 19,
+      "scale": 0.696
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        17.0332,
+        -0.055,
+        34.1269
+      ],
+      "yaw": 12,
+      "scale": 1.082
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -34.3936,
+        0.7689,
+        -29.3652
+      ],
+      "yaw": 353,
+      "scale": 0.731
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -34.1324,
+        0.5765,
+        27.4882
+      ],
+      "yaw": 12,
+      "scale": 0.701
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -24.9305,
+        0.1117,
+        32.1115
+      ],
+      "yaw": 227,
+      "scale": 0.765
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -46.3998,
+        3.5503,
+        -44.4488
+      ],
+      "yaw": 286,
+      "scale": 1.169
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -36.3207,
+        1.8398,
+        -35.3957
+      ],
+      "yaw": 57,
+      "scale": 0.848
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        46.213,
+        1.6108,
+        -29.1384
+      ],
+      "yaw": 37,
+      "scale": 0.978
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        41.4491,
+        3.2973,
+        -43.1114
+      ],
+      "yaw": 344,
+      "scale": 1.502
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -29.4637,
+        1.3521,
+        -35.5706
+      ],
+      "yaw": 178,
+      "scale": 1.311
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        32.227,
+        1.1991,
+        -31.3596
+      ],
+      "yaw": 124,
+      "scale": 1.368
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        28.6959,
+        0.4633,
+        29.5051
+      ],
+      "yaw": 139,
+      "scale": 0.791
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -31.1003,
+        0.4457,
+        -23.6413
+      ],
+      "yaw": 177,
+      "scale": 1.454
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        2.7989,
+        0.947,
+        -35.5417
+      ],
+      "yaw": 331,
+      "scale": 1.389
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -15.2173,
+        1.1468,
+        -37.4714
+      ],
+      "yaw": 176,
+      "scale": 0.916
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        9.8898,
+        0.1318,
+        27.0922
+      ],
+      "yaw": 298,
+      "scale": 1.015
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        33.3219,
+        0.8671,
+        -26.0252
+      ],
+      "yaw": 201,
+      "scale": 1.417
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -20.5221,
+        0.191,
+        29.5314
+      ],
+      "yaw": 151,
+      "scale": 1.133
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -32.3258,
+        0.7708,
+        10.8946
+      ],
+      "yaw": 150,
+      "scale": 1.122
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -37.3129,
+        2.5683,
+        -39.9735
+      ],
+      "yaw": 176,
+      "scale": 0.851
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        45.6378,
+        3.5696,
+        -42.0023
+      ],
+      "yaw": 88,
+      "scale": 1.441
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -35.6158,
+        0.7339,
+        2.126
+      ],
+      "yaw": 182,
+      "scale": 1.122
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -22.547,
+        0.1295,
+        31.1172
+      ],
+      "yaw": 251,
+      "scale": 1.068
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        3.581,
+        1.0352,
+        -36.4914
+      ],
+      "yaw": 46,
+      "scale": 1.03
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        35.6088,
+        1.9062,
+        -36.5004
+      ],
+      "yaw": 131,
+      "scale": 1.354
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        39.3404,
+        1.1517,
+        19.8731
+      ],
+      "yaw": 42,
+      "scale": 0.952
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -34.836,
+        0.721,
+        33.192
+      ],
+      "yaw": 0,
+      "scale": 1.319
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        45.2446,
+        1.5102,
+        -28.9149
+      ],
+      "yaw": 47,
+      "scale": 1.376
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -25.6858,
+        0.7079,
+        -32.5299
+      ],
+      "yaw": 99,
+      "scale": 0.96
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        1.7979,
+        2.1321,
+        -45.6059
+      ],
+      "yaw": 185,
+      "scale": 0.939
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        36.178,
+        0.8118,
+        11.0041
+      ],
+      "yaw": 193,
+      "scale": 1.105
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        16.9985,
+        1.4084,
+        -38.5175
+      ],
+      "yaw": 338,
+      "scale": 0.671
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        41.1699,
+        1.2768,
+        6.5754
+      ],
+      "yaw": 266,
+      "scale": 1.039
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        33.4898,
+        1.9076,
+        -38.4666
+      ],
+      "yaw": 17,
+      "scale": 0.848
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -45.8934,
+        1.8258,
+        -26.7213
+      ],
+      "yaw": 256,
+      "scale": 1.115
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        4.3939,
+        2.1144,
+        -45.9861
+      ],
+      "yaw": 289,
+      "scale": 1.474
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -9.6053,
+        2.3537,
+        -45.901
+      ],
+      "yaw": 303,
+      "scale": 1.293
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -26.536,
+        0.5065,
+        -30.6527
+      ],
+      "yaw": 68,
+      "scale": 1.444
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        -44.6409,
+        1.6899,
+        3.3654
+      ],
+      "yaw": 270,
+      "scale": 1.261
+    },
+    {
+      "asset": "Fir Tree",
+      "position": [
+        42.5594,
+        1.2654,
+        -26.4222
+      ],
+      "yaw": 39,
+      "scale": 1.3
+    },
+    {
+      "asset": "Moss Rock",
+      "position": [
+        -30.3476,
+        0.6399,
+        -15.3351
+      ],
+      "yaw": 285,
+      "scale": 1.097
+    }
+  ],
+  "palette": [
+    {
+      "name": "Oak",
+      "color": "674332",
+      "surface": "wood"
+    },
+    {
+      "name": "Oak Edge",
+      "color": "996546",
+      "surface": "wood"
+    },
+    {
+      "name": "Dark Wood",
+      "color": "332624",
+      "surface": "wood"
+    },
+    {
+      "name": "Plaster",
+      "color": "c9a979",
+      "surface": "stone"
+    },
+    {
+      "name": "Limestone",
+      "color": "8a9a91",
+      "surface": "stone"
+    },
+    {
+      "name": "Pale Stone",
+      "color": "bfba9c",
+      "surface": "stone"
+    },
+    {
+      "name": "Basalt",
+      "color": "4d5362",
+      "surface": "stone"
+    },
+    {
+      "name": "Slate",
+      "color": "547182",
+      "surface": "stone"
+    },
+    {
+      "name": "Slate Edge",
+      "color": "7695a3",
+      "surface": "stone"
+    },
+    {
+      "name": "Ember Tile",
+      "color": "934a3f",
+      "surface": "stone"
+    },
+    {
+      "name": "Ember Edge",
+      "color": "ad6450",
+      "surface": "stone"
+    },
+    {
+      "name": "Iron",
+      "color": "536472",
+      "surface": "metal"
+    },
+    {
+      "name": "Steel",
+      "color": "a5c0c5",
+      "surface": "metal"
+    },
+    {
+      "name": "Gold",
+      "color": "ce9a4f",
+      "surface": "metal"
+    },
+    {
+      "name": "Black Iron",
+      "color": "313345",
+      "surface": "metal"
+    },
+    {
+      "name": "Red Iron",
+      "color": "85515d",
+      "surface": "metal"
+    },
+    {
+      "name": "Bone",
+      "color": "ded0ac",
+      "surface": "stone"
+    },
+    {
+      "name": "Banner Teal",
+      "color": "287a79",
+      "surface": "fabric"
+    },
+    {
+      "name": "Banner Red",
+      "color": "883747",
+      "surface": "fabric"
+    },
+    {
+      "name": "Linen",
+      "color": "c7b891",
+      "surface": "fabric"
+    },
+    {
+      "name": "Cloak Blue",
+      "color": "394d76",
+      "surface": "fabric"
+    },
+    {
+      "name": "Cloak Violet",
+      "color": "624265",
+      "surface": "fabric"
+    },
+    {
+      "name": "Leather",
+      "color": "614036",
+      "surface": "wood"
+    },
+    {
+      "name": "Skin Warm",
+      "color": "bb8060",
+      "surface": ""
+    },
+    {
+      "name": "Skin Deep",
+      "color": "9a634b",
+      "surface": ""
+    },
+    {
+      "name": "Skin Ash",
+      "color": "9698a5",
+      "surface": ""
+    },
+    {
+      "name": "Goblin Skin",
+      "color": "829752",
+      "surface": ""
+    },
+    {
+      "name": "Brute Skin",
+      "color": "897760",
+      "surface": ""
+    },
+    {
+      "name": "Eye",
+      "color": "ead9ad",
+      "surface": ""
+    },
+    {
+      "name": "Black",
+      "color": "292a31",
+      "surface": ""
+    },
+    {
+      "name": "Hair",
+      "color": "553731",
+      "surface": ""
+    },
+    {
+      "name": "Silver Hair",
+      "color": "b9b0a5",
+      "surface": ""
+    },
+    {
+      "name": "Jade",
+      "color": "3db7ad",
+      "surface": "glow"
+    },
+    {
+      "name": "Amber",
+      "color": "ffae55",
+      "surface": "glow"
+    },
+    {
+      "name": "Violet",
+      "color": "c35a9f",
+      "surface": "glow"
+    },
+    {
+      "name": "Grass",
+      "color": "627553",
+      "surface": ""
+    },
+    {
+      "name": "Grass Light",
+      "color": "76865d",
+      "surface": ""
+    },
+    {
+      "name": "Grass Dark",
+      "color": "4d634c",
+      "surface": ""
+    },
+    {
+      "name": "Meadow",
+      "color": "ffffff",
+      "surface": "terrain"
+    },
+    {
+      "name": "Trail",
+      "color": "9b8264",
+      "surface": "stone"
+    },
+    {
+      "name": "River",
+      "color": "32768a",
+      "surface": ""
+    },
+    {
+      "name": "Foam",
+      "color": "89d2c3",
+      "surface": ""
+    }
+  ]
+}

@@ -782,6 +782,49 @@ namespace Riftbound
 
         public QuestDef GetActiveQuest() => string.IsNullOrEmpty(ActiveQuestId) ? null : GetQuest(ActiveQuestId);
 
+        public bool TryGetActiveQuestDestination(PlayerController player, out Vector3 position, out string caption)
+        {
+            position = default;
+            caption = null;
+            var quest = GetActiveQuest();
+            if (quest == null) return false;
+
+            bool ready = IsActiveQuestReady();
+            if (quest.targetType == "discover_landmark" && !ready)
+            {
+                foreach (var id in ExplorationSites.SurveyIds)
+                {
+                    if (player.HasLandmark(id)) continue;
+                    foreach (var landmark in FindObjectsByType<Landmark>(FindObjectsSortMode.None))
+                    {
+                        if (landmark.landmarkId != id) continue;
+                        position = landmark.transform.position;
+                        caption = landmark.displayName;
+                        return true;
+                    }
+                    break;
+                }
+                return false;
+            }
+
+            if (ready || quest.targetType == "talk_npc")
+            {
+                string npcName = quest.targetType == "talk_npc" ? quest.targetId : quest.giverNpc;
+                foreach (var npc in FindObjectsByType<TownNPC>(FindObjectsSortMode.None))
+                {
+                    if (!string.Equals(npc.npcName, npcName, StringComparison.OrdinalIgnoreCase)) continue;
+                    position = npc.transform.position;
+                    caption = ready ? $"Turn in to {npcName}" : $"Speak to {npcName}";
+                    return true;
+                }
+                if (ready) return false;
+            }
+
+            position = quest.targetLocation;
+            caption = quest.title;
+            return position.sqrMagnitude > 1f;
+        }
+
         public bool HasAvailableQuest(string npcName, PlayerController player)
         {
             if (catalog.Count == 0) BuildCatalog();
@@ -863,47 +906,31 @@ namespace Riftbound
                 CombatTextManager.Spawn(player.transform.position + Vector3.up * 2f, $"★ QUEST: {quest.title} ★", new Color(1f, 0.85f, 0.2f), true);
             }
 
-            if (MinimapRadar.Instance && quest.targetLocation.sqrMagnitude > 1f)
-            {
-                MinimapRadar.SetWaypoint(quest.targetLocation, quest.title);
-            }
-
-            if (quest.targetType == "discover_landmark") UpdateSurvey(player, true);
+            if (quest.targetType == "discover_landmark") UpdateSurvey(player);
             else if (player && quest.targetType == "defeat_enemy" && quest.requiredCount == 1 &&
                 ExactBossTarget(quest.targetId) && player.HasDefeated(quest.targetId))
             {
                 CurrentProgress = 1;
-                TrackTurnIn(quest);
             }
 
+            MinimapRadar.Instance?.StartFactionNavigation();
             SaveData();
         }
 
         public void OnLandmarkDiscovered(PlayerController player)
         {
             if (GetActiveQuest()?.targetType != "discover_landmark") return;
-            UpdateSurvey(player, true);
+            UpdateSurvey(player);
+            MinimapRadar.Instance?.RefreshQuestNavigation();
             SaveData();
         }
 
-        void UpdateSurvey(PlayerController player, bool track)
+        void UpdateSurvey(PlayerController player)
         {
             if (!player) return;
             CurrentProgress = 0;
-            string next = null;
             foreach (string id in ExplorationSites.SurveyIds)
-                if (player.HasLandmark(id)) CurrentProgress++; else if (next == null) next = id;
-            if (!track) return;
-            if (next != null)
-            {
-                foreach (var landmark in FindObjectsByType<Landmark>(FindObjectsSortMode.None))
-                    if (landmark.landmarkId == next) { MinimapRadar.SetWaypoint(landmark.transform.position, landmark.displayName); break; }
-            }
-            else
-            {
-                foreach (var npc in FindObjectsByType<TownNPC>(FindObjectsSortMode.None))
-                    if (npc.npcName == ExplorationSites.CartographerName) { MinimapRadar.SetWaypoint(npc.transform.position, "Return to " + npc.npcName); break; }
-            }
+                if (player.HasLandmark(id)) CurrentProgress++;
         }
 
         public void CompleteQuest(PlayerController player)
@@ -961,10 +988,7 @@ namespace Riftbound
             ZoneBanner.Show("QUEST COMPLETED", $"{completedTitle}\n+{goldGain} Gold  +{xpGain} XP");
             ChatSystem.LogQuest($"<color=#ffd700><b>[QUEST COMPLETE]</b></color> {completedTitle}! Rewards: {goldGain} Gold, {xpGain} XP.");
 
-            if (MinimapRadar.Instance)
-            {
-                MinimapRadar.ClearWaypoint();
-            }
+            MinimapRadar.Instance?.RefreshQuestNavigation();
         }
 
         public void OnEnemyDefeated(EnemyController enemy)
@@ -992,7 +1016,7 @@ namespace Riftbound
                     {
                         player.Message = $"Objective Complete! Return to {q.giverNpc} in {q.zone}.";
                         AudioEffects.PlayQuestComplete();
-                        TrackTurnIn(q);
+                        MinimapRadar.Instance?.RefreshQuestNavigation();
                     }
                     else
                     {
@@ -1004,12 +1028,6 @@ namespace Riftbound
         }
 
         static bool ExactBossTarget(string id) => id == "redridge-outcast-boss" || id == "vermithrax-boss" || id == RiverReaverCamp.CaptainId;
-
-        static void TrackTurnIn(QuestDef quest)
-        {
-            foreach (var npc in FindObjectsByType<TownNPC>(FindObjectsSortMode.None))
-                if (npc.npcName == quest.giverNpc) { MinimapRadar.SetWaypoint(npc.transform.position, "Return to " + npc.npcName); break; }
-        }
 
         public void OnTalkedToNPC(string npcName)
         {

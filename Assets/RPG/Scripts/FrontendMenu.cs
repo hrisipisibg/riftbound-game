@@ -600,7 +600,7 @@ namespace Riftbound
             body.normal.textColor = new Color(0.86f, 0.87f, 0.82f);
 
             small = new GUIStyle(body) { fontSize = 12 };
-            small.normal.textColor = new Color(0.65f, 0.68f, 0.68f);
+            small.normal.textColor = new Color(0.87f, 0.91f, 0.95f);
 
             buttonNormal = Solid(new Color(.095f, .105f, .115f));
             buttonHover = Solid(new Color(.15f, .165f, .18f));
@@ -621,13 +621,18 @@ namespace Riftbound
             WowTheme.StyleButton(enterButton, true);
 
             dangerButton = new GUIStyle(button) { fontSize = 13 };
-            dangerButton.normal.textColor = new Color(1.0f, 0.40f, 0.40f);
+            dangerButton.normal.textColor = new Color(1.0f, 0.69f, 0.67f);
 
             field = new GUIStyle(GUI.skin.textField) { fontSize = 20, alignment = TextAnchor.MiddleLeft, padding = new RectOffset(12, 12, 6, 6) };
+            field.normal.background = buttonNormal;
+            field.focused.background = buttonHover;
+            field.hover.background = buttonNormal;
+            field.active.background = buttonHover;
+            field.normal.textColor = field.focused.textColor = field.hover.textColor = field.active.textColor = Color.white;
 
             cardTitle = new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold };
             cardSub = new GUIStyle(GUI.skin.label) { fontSize = 12, wordWrap = false };
-            cardSub.normal.textColor = new Color(0.72f, 0.74f, 0.72f);
+            cardSub.normal.textColor = new Color(0.85f, 0.89f, 0.92f);
         }
 
         void OnGUI()
@@ -820,7 +825,7 @@ namespace Riftbound
                 Fill(new Rect(rect.x + 60, rect.yMax + 6, rect.width - 120, 1), gold * 0.6f);
 
                 var nameStyle = new GUIStyle(heading) { alignment = TextAnchor.MiddleCenter, fontSize = 18 };
-                nameStyle.normal.textColor = GetClassColor(Selected.characterClass);
+                nameStyle.normal.textColor = Color.Lerp(GetClassColor(Selected.characterClass), Color.white, .46f);
                 GUI.Label(new Rect(rect.x + 60, rect.yMax + 9, rect.width - 120, 24), Selected.name, nameStyle);
 
                 var detailsStyle = new GUIStyle(small) { alignment = TextAnchor.MiddleCenter };
@@ -1022,7 +1027,7 @@ namespace Riftbound
 
             string chosenClass = availableClasses[classIndex];
             var classTitleStyle = new GUIStyle(cardTitle);
-            classTitleStyle.normal.textColor = GetClassColor(chosenClass);
+            classTitleStyle.normal.textColor = Color.Lerp(GetClassColor(chosenClass), Color.white, .46f);
             GUI.Label(new Rect(rect.x + 22, rect.y + 243, rect.width - 44, 22), chosenClass, classTitleStyle);
             GUI.Label(new Rect(rect.x + 22, rect.y + 268, rect.width - 44, 180), ClassSystem.GetClassDescription(chosenClass), body);
         }

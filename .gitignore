@@ -12,6 +12,10 @@
 !/Packages/
 !/ProjectSettings/
 !/Docs/
+!/Tools/
+/Tools/*
+!/Tools/Emberford/
+/Tools/Emberford/__pycache__/
 !/.github/
 
 # Unity caches, local state, diagnostics and the previous VCS stay local.
@@ -76,6 +80,7 @@
 !/Docs/GAMEPLAY.md
 !/Docs/ROADMAP.md
 !/Docs/RELEASE_PLAN.md
+!/Docs/FRONTIER_PLAYABLE_PLAN.md
 /Docs/Design/*
 !/Docs/Design/COMBAT_REFINEMENT_PLAN.md
 /Docs/Integration/*

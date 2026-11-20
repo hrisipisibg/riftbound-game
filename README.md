@@ -6,13 +6,9 @@ A 3D fantasy RPG built with Unity for a diploma project and competition. Explore
 
 1. Install Git LFS and run `git lfs install`.
 2. Clone the repository, then run `git lfs pull`.
-3. Open the project in Unity Hub using **Unity 6000.6.2f1**.
+3. Open the project in Unity Hub using **Unity6000.6.2f1**.
 4. Open `Assets/RPG/Scenes/Outpost-Expanded.unity` and press Play.
 5. Select a character and enter the world. Use the Game tab for keyboard and mouse input.
-
-## CC0 world rebuild
-
-The expanded scene has the Westbank stone crossing and reshaped banks, six rebuilt building exteriors, four cottages, five market yards, new regional foliage and two animated townsfolk. Source license records for the new packs are in "Assets/RPG/ThirdParty/CC0World".
 
 ## Play
 

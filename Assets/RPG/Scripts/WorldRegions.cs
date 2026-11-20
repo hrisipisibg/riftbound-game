@@ -8,6 +8,9 @@ namespace Riftbound
         public const string ScenePath = "Assets/RPG/Scenes/Outpost-Expanded.unity";
         public static bool Expanded => SceneManager.GetActiveScene().name == "Outpost-Expanded";
         public static Rect Bounds => Expanded ? new Rect(-320, -160, 768, 768) : new Rect(-120, -115, 240, 380);
+        public static readonly Vector3 Emberford = new Vector3(72, 1.2f, -39);
+        public static readonly Vector3 AshwoodWatchChapel = new Vector3(69, 5.3f, 105);
+        public static readonly Vector3 BriarStockade = new Vector3(149, 11.8f, 174);
         public static readonly Vector3 Highspire = new Vector3(-200, 12, -60);
         public static readonly Vector3 Frostpeak = new Vector3(-95, 16, -90);
         public static readonly Vector3 Silverglen = new Vector3(-150, 15, 75);
@@ -64,6 +67,7 @@ namespace Riftbound
 
         public static string ZoneName(Vector3 point)
         {
+            if (BrassHollows.Inside(point)) return "The Brass Hollows";
             if (Underground(point)) return "The Scarlet Crypts";
             if (point.z > 430 && point.x > 95) return "Wyrmcrest Summit";
             if (point.z > 330 && point.x >= 110) return "Wyrmcrest Crags";

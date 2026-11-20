@@ -37,7 +37,7 @@ namespace Riftbound
 
             EnsureStyles();
 
-            float scale = PrototypeHUD.LayoutScale;
+            float scale = Mathf.Min(Screen.width / 1280f, Screen.height / 720f);
             var oldMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one * scale);
             float w = Screen.width / scale;

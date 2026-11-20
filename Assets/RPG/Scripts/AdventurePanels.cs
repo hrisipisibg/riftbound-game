@@ -4,6 +4,11 @@ namespace Riftbound
 {
     public partial class PrototypeHUD
     {
+        Texture2D atlasPaper, atlasRelief;
+        Vector2 atlasRegionScroll;
+        bool atlasPaperLoaded;
+        Vector3[] atlasRiverBanks;
+
         void DrawAdventurePanels(float width, float height)
         {
             if (!player.MapOpen && !player.InventoryOpen && !player.DialogueOpen && !player.ShopOpen && !player.JournalOpen)
@@ -36,8 +41,11 @@ namespace Riftbound
             }
             if (player.ShopOpen)
             {
-                float x = width / 2 - 330, y = height / 2 - 250;
-                Panel(new Rect(x, y, 660, 500));
+                bool westernQuest = player.CanUseWesternRoadQuest && player.ActiveMerchant.npcName == WesternRoadCamps.Rowan &&
+                    player.QuestIndex >= 2;
+                float shopHeight = westernQuest ? 570f : 500f;
+                float x = width / 2 - 330, y = height / 2 - shopHeight / 2;
+                Panel(new Rect(x, y, 660, shopHeight));
                 GUI.Label(new Rect(x + 24, y + 20, 600, 36), player.ActiveMerchant.npcName.ToUpperInvariant(), title);
                 var merchantProfile = Narrative.NarrativeCatalog.ResolveMerchant(player.ActiveMerchant);
                 var merchantGreeting = Narrative.NarrativeCatalog.SelectText(merchantProfile, "greeting", "", player);
@@ -63,7 +71,21 @@ namespace Riftbound
                 GUI.enabled = player.BoneShards > 0 && !player.InCombat();
                 if (GUI.Button(new Rect(x + 455, y + 369, 180, 36), "SELL ALL SHARDS", questButton)) player.SellShards();
                 GUI.enabled = true;
-                if (GUI.Button(new Rect(x + 24, y + 445, 610, 38), "FAREWELL  /  E OR ESC", questButton)) player.CloseShop();
+                if (westernQuest)
+                {
+                    GUI.Label(new Rect(x + 24, y + 420, 610, 26), WesternRoadCamps.QuestTitle, title);
+                    string roadText = player.WesternRoadStage switch
+                    {
+                        0 => "The grain wagon never arrived. Find its waybill at the layby on the Highspire road.",
+                        3 => "One wagon and two seals. Let’s pay the ferry crew for the load they actually carried.",
+                        _ => player.WesternRoadObjective
+                    };
+                    GUI.Label(new Rect(x + 24, y + 450, 420, 53), roadText, small);
+                    if ((player.WesternRoadStage == 0 || player.WesternRoadStage == 3) &&
+                        GUI.Button(new Rect(x + 452, y + 453, 183, 38), player.WesternRoadStage == 0 ? "Accept quest" : "Turn in quest", questButton))
+                        player.HandleWesternRoadAtRowan();
+                }
+                if (GUI.Button(new Rect(x + 24, y + shopHeight - 55, 610, 38), "FAREWELL  /  E OR ESC", questButton)) player.CloseShop();
             }
             if (player.JournalOpen) { DrawQuestJournal(width, height); return; }
             if (!player.MapOpen) return;
@@ -164,7 +186,7 @@ namespace Riftbound
                     Mark(area, enemy.transform.position, enemy.trainingDummy ? "Dummy" : (enemy.isBoss ? "★ BOSS" : ""), enemy.trainingDummy ? new Color(.4f, 1, .7f) : new Color(1, .3f, .2f), enemy.isBoss ? 11 : 6);
 
             if (player.questGiver) Mark(area, player.questGiver.position, "Abe", new Color(.4f, 1, .5f), 8);
-            Mark(area, player.ObjectivePosition, "★ Quest Objective", new Color(1, .9f, .2f), 13);
+            DrawAtlasDestination(area);
 
             // Player Blip (Glowing pulsing cyan circle)
             Vector2 pPos = MapPoint(area, player.transform.position);
@@ -195,21 +217,24 @@ namespace Riftbound
 
         void FlightLine(Rect area, Vector3 from, Vector3 to)
         {
-            Vector2 a = MapPoint(area, from), b = MapPoint(area, to);
-            var matrix = GUI.matrix;
-            GUIUtility.RotateAroundPivot(Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg, a);
-            Fill(new Rect(a.x, a.y - 1, Vector2.Distance(a, b), 2), new Color(1f, 0.82f, 0.25f, 0.85f));
-            GUI.matrix = matrix;
+            DrawAtlasSegment(MapPoint(area, from), MapPoint(area, to), 2f, new Color(1f, 0.82f, 0.25f, 0.85f));
         }
         void DrawExpandedAtlas(Rect panel)
         {
             var area = new Rect(panel.x, panel.y, panel.height, panel.height);
-            Fill(area, new Color(.17f, .23f, .16f));
-            PlotZone(area, new Vector3(-320,0,125),new Vector3(-140,0,365),new Color(.14f,.16f,.20f));
-            PlotZone(area, new Vector3(-145,0,325),new Vector3(100,0,510),new Color(.16f,.30f,.22f));
-            PlotZone(area, new Vector3(105,0,95),new Vector3(448,0,365),new Color(.34f,.25f,.15f));
-            PlotZone(area, new Vector3(95,0,420),new Vector3(448,0,608),new Color(.40f,.46f,.48f));
-            PlotZone(area, new Vector3(-320,0,-160),new Vector3(-135,0,125),new Color(.15f,.25f,.23f));
+            if (Event.current.type == EventType.Repaint)
+            {
+                if (!atlasPaperLoaded)
+                {
+                    atlasPaper = Resources.Load<Texture2D>("WorldAtlasPaper");
+                    atlasPaperLoaded = true;
+                }
+                if (!atlasRelief) atlasRelief = CreateAtlasRelief();
+                Fill(area, new Color(.89f, .78f, .58f));
+                if (atlasPaper) GUI.DrawTexture(area, atlasPaper);
+                if (atlasRelief) GUI.DrawTexture(area, atlasRelief);
+            }
+            DrawAtlasRiver(area);
             var network = FindFirstObjectByType<WorldMapRoutes>();
             if (network && network.routes != null)
                 foreach (var route in network.routes)
@@ -218,36 +243,232 @@ namespace Riftbound
             MapLine(area,new Vector3(0,0,51),new Vector3(25,0,64));
             MapLine(area,new Vector3(25,0,64),new Vector3(35,0,91));
             MapLine(area,new Vector3(0,0,50),new Vector3(-34,0,70));
-            for(int i=1;i<=26;i++)
+            DrawAtlasLabel(area, new Vector3(5, 0, 28), "Emberwatch");
+            DrawAtlasLabel(area, WorldRegions.Cathedral, "Duskwood");
+            DrawAtlasLabel(area, WorldRegions.Bloodrock, "Bloodrock");
+            DrawAtlasLabel(area, WorldRegions.Greenhollow, "Greenhollow");
+            DrawAtlasLabel(area, WorldRegions.Summit, "Wyrmcrest");
+            DrawAtlasLabel(area, new Vector3(-245, 0, 40), "Willowmere");
+            DrawAtlasLabel(area, WorldRegions.Highspire, "Highspire");
+            DrawAtlasLabel(area, WorldRegions.Stronghold, "Gor’Kresh");
+            var westernCamps = WesternRoadCamps.Current;
+            if (westernCamps)
             {
-                float z=-130+i*10;
-                Vector2 from=MapPoint(area,new Vector3(-264+9*Mathf.Sin((z-10)*.025f),0,z-10));
-                Vector2 to=MapPoint(area,new Vector3(-264+9*Mathf.Sin(z*.025f),0,z));
-                var matrix=GUI.matrix;
-                GUIUtility.RotateAroundPivot(Mathf.Atan2(to.y-from.y,to.x-from.x)*Mathf.Rad2Deg,from);
-                Fill(new Rect(from.x,from.y-1,Vector2.Distance(from,to),2),new Color(.22f,.55f,.78f));
-                GUI.matrix=matrix;
+                Mark(area, westernCamps.Layby.position, "", new Color(.66f, .38f, .10f), 10f);
+                Mark(area, westernCamps.Rest.position, "", new Color(.66f, .38f, .10f), 10f);
+                DrawAtlasLabel(area, westernCamps.Layby.position, "Split-Seal Layby");
+                DrawAtlasLabel(area, westernCamps.Rest.position, "Tallykeepers’ Rest");
             }
-            MarkZoneTitle(area,new Vector3(5,0,28),"EMBERWATCH\nAlliance starting lands",new Color(.70f,.85f,.60f));
-            MarkZoneTitle(area,WorldRegions.Cathedral,"DUSKWOOD\nCathedral & haunted forest",new Color(.75f,.70f,.85f));
-            MarkZoneTitle(area,WorldRegions.Bloodrock,"BLOODROCK\nHorde frontier",new Color(1,.75f,.45f));
-            MarkZoneTitle(area,WorldRegions.Greenhollow,"GREENHOLLOW\nNorthern valley",new Color(.55f,.90f,.70f));
-            MarkZoneTitle(area,WorldRegions.Summit,"WYRMCREST\nMountain pass & summit",new Color(.85f,.93f,1));
-            MarkZoneTitle(area,new Vector3(-245,0,40),"WILLOWMERE\nRiver & western woods",new Color(.65f,.85f,.8f));
+            var hollows = BrassHollows.Current;
+            if (hollows)
+            {
+                Mark(area, hollows.Entrance, "", new Color(.39f, .21f, .57f), 10f);
+                DrawAtlasLabel(area, hollows.Entrance, "Brass Hollows");
+            }
+            foreach (var stop in SettlementWaystop.Active)
+                Mark(area, stop.transform.position, "", new Color(.32f, .49f, .25f), 9);
             foreach(var node in FlightMaster.WorldFlightNodes) Mark(area,node.targetPos,"",new Color(1,.8f,.25f),5);
             foreach (var landmark in FindObjectsByType<Landmark>(FindObjectsSortMode.None))
-                Mark(area, landmark.transform.position, player.HasLandmark(landmark.landmarkId) ? "" : "Scout", new Color(.55f, 1, .8f), 4);
-            if(player.questGiver) Mark(area,player.questGiver.position,"",new Color(.4f,1,.5f),6);
-            if(!player.QuestComplete) Mark(area,player.ObjectivePosition,"",new Color(1,.9f,.2f),9);
-            Mark(area,player.transform.position,"YOU",new Color(.2f,.95f,1),8);
+                if (!player.HasLandmark(landmark.landmarkId))
+                    Mark(area, landmark.transform.position, "", new Color(.15f, .37f, .29f), 4);
+            DrawAtlasDestination(area);
+            bool inHollows = hollows && BrassHollows.Inside(player.transform.position);
+            Vector3 playerPin = inHollows ? hollows.Entrance :
+                WorldRegions.Underground(player.transform.position) ? WorldRegions.Cathedral : player.transform.position;
+            Mark(area, playerPin, "", new Color(.09f,.18f,.22f), 12);
+            Mark(area, playerPin, "", new Color(.25f,.93f,1), 8);
+            DrawAtlasLabel(area, playerPin, inHollows || WorldRegions.Underground(player.transform.position) ? "You · Below ground" : "You");
+            DrawAtlasQuestMarkers(area);
+            GUI.Label(new Rect(area.x + 8, area.y + 6, 70, 24), "▲ N", new GUIStyle(small)
+            {
+                fontStyle = FontStyle.Bold,
+                normal = { textColor = new Color(.16f, .12f, .08f) }
+            });
             float x=panel.x+panel.height+20, y=panel.y+12, w=panel.width-panel.height-36;
-            GUI.Label(new Rect(x,y,w,26),"768 × 768 m",title);
-            GUI.Label(new Rect(x,y+36,w,42),"Choose a region to place a travel waypoint.",label);
-            string[] names={"Emberwatch Outpost","Duskwood Cathedral","Camp Bloodrock","Greenhollow Valley","Wyrmcrest Summit","Willowmere Wilds","Highspire Keep","Gor'Kresh Stronghold"};
-            Vector3[] positions={new Vector3(0,0,10),WorldRegions.Cathedral,WorldRegions.Bloodrock,WorldRegions.Greenhollow,WorldRegions.Summit,new Vector3(-285,6,50),WorldRegions.Highspire,WorldRegions.Stronghold};
+            if (GUI.Button(new Rect(x, y, w * .5f - 3, 27), "Quests", questButton)) atlasPlaces = false;
+            if (GUI.Button(new Rect(x + w * .5f + 3, y, w * .5f - 3, 27), "Places", questButton)) atlasPlaces = true;
+            y += 35f;
+            if (!atlasPlaces)
+            {
+                DrawAtlasQuestList(new Rect(x, y, w, panel.yMax - y - 9));
+                return;
+            }
+            GUI.Label(new Rect(x,y,w,29),"FRONTIER SITES",title);
+            GUI.Label(new Rect(x,y+34,w,24),"Choose a site to follow its waypoint.",small);
+            if (westernCamps)
+            {
+                DrawSiteWaypoint(new Rect(x,y+62,w,30),"Split-Seal Layby",westernCamps.Layby.position);
+                DrawSiteWaypoint(new Rect(x,y+96,w,30),"Tallykeepers’ Rest",westernCamps.Rest.position);
+            }
+            if (hollows) DrawSiteWaypoint(new Rect(x,y+130,w,30),"Brass Hollows entrance",hollows.Entrance);
+            GUI.Label(new Rect(x,y+170,w,24),"WAYPOINTS",small);
+            string[] names={"Emberwatch Outpost","Ashwood Supply Camp","Ruined Watchtower","Westbank Crossing","Duskwood Cathedral","Camp Bloodrock","Greenhollow Valley","Wyrmcrest Summit","Willowmere Wilds","Highspire Keep","Gor'Kresh Stronghold"};
+            Vector3[] positions={new Vector3(0,0,10),new Vector3(24,2,61),new Vector3(35,6,86),new Vector3(-255,6,50),WorldRegions.Cathedral,WorldRegions.Bloodrock,WorldRegions.Greenhollow,WorldRegions.Summit,new Vector3(-285,6,50),WorldRegions.Highspire,WorldRegions.Stronghold};
+            var waystops = SettlementWaystop.Active;
+            atlasRegionScroll = GUI.BeginScrollView(new Rect(x,y+198,w,180), atlasRegionScroll, new Rect(0,0,w-19,(names.Length + waystops.Count)*35));
+            for (int i = 0; i < waystops.Count; i++)
+                DrawSiteWaypoint(new Rect(0, i * 35, w - 19, 30), waystops[i].displayName, waystops[i].transform.position);
             for(int i=0;i<names.Length;i++)
-                if(GUI.Button(new Rect(x,y+92+i*39,w,33),names[i],questButton)) MinimapRadar.SetWaypoint(positions[i],names[i]);
-            GUI.Label(new Rect(x,y+422,w,80),"Gold: roads / flight stops\nCyan: your position\nYellow: quest objective\nTravel along roads or call a flight taxi.",small);
+                if(GUI.Button(new Rect(0,(i + waystops.Count)*35,w-19,30),names[i],questButton)) MinimapRadar.SetWaypoint(positions[i],names[i]);
+            GUI.EndScrollView();
+            var radar = MinimapRadar.Instance;
+            if (radar && radar.TryGetNavigationTarget(out _, out var caption))
+            {
+                bool pinned = radar.customWaypoint.HasValue;
+                GUI.Label(new Rect(x,y+384,w,24), pinned ? "MAP PIN" : "QUEST DESTINATION", small);
+                GUI.Label(new Rect(x,y+406,w,30), caption, label);
+                if (pinned && GUI.Button(new Rect(x,y+438,w,27), "CLEAR PIN", questButton))
+                    MinimapRadar.ClearWaypoint();
+            }
+        }
+
+        bool atlasPlaces;
+        Vector2 atlasQuestScroll;
+        readonly System.Collections.Generic.List<Vector2> atlasQuestPoints = new();
+
+        void DrawAtlasQuestMarkers(Rect area)
+        {
+            var radar = MinimapRadar.Instance;
+            if (!radar) return;
+            atlasQuestPoints.Clear();
+            foreach (var pin in radar.QuestPins)
+            {
+                Vector2 point = MapPoint(area, MinimapRadar.AtlasPosition(pin.position));
+                bool stacked = false;
+                foreach (var placed in atlasQuestPoints)
+                    if ((placed - point).sqrMagnitude < 18f * 18f) { stacked = true; break; }
+                if (stacked) continue;
+                atlasQuestPoints.Add(point);
+                var hit = new Rect(Mathf.Clamp(point.x - 10, area.x, area.xMax - 20),
+                    Mathf.Clamp(point.y - 10, area.y, area.yMax - 20), 20, 20);
+                if (radar.DrawQuestMapPin(hit, pin)) radar.SelectQuestPin(pin);
+            }
+        }
+
+        void DrawAtlasQuestList(Rect panel)
+        {
+            var radar = MinimapRadar.Instance;
+            if (!radar) return;
+            GUI.Label(new Rect(panel.x, panel.y, panel.width, 24), "! Available   ◆ Objective   ? Turn in", small);
+            if (radar.QuestPins.Count == 0)
+                GUI.Label(new Rect(panel.x, panel.y + 31, panel.width, 32), "No visible quests at this stage.", small);
+            float listWidth = panel.width - 17, rowHeight = 44;
+            var rows = new Rect(panel.x, panel.y + 30, panel.width, panel.height - 81);
+            atlasQuestScroll = GUI.BeginScrollView(rows, atlasQuestScroll,
+                new Rect(0, 0, listWidth, rowHeight * radar.QuestPins.Count));
+            for (int i = 0; i < radar.QuestPins.Count; i++)
+            {
+                var pin = radar.QuestPins[i];
+                var row = new Rect(0, i * rowHeight, listWidth - 2, rowHeight - 3);
+                var zone = ZoneManager.GetZoneName(pin.position);
+                if (GUI.Button(row, GUIContent.none, questButton)) radar.SelectQuestPin(pin);
+                var textRect = new Rect(row.x + 8, row.y + 2, row.width - 15, 20);
+                Color saved = GUI.contentColor;
+                GUI.contentColor = pin.Ink;
+                GUI.Label(textRect, pin.Icon + "  " + pin.caption, small);
+                GUI.contentColor = saved;
+                GUI.Label(new Rect(textRect.x + 15, textRect.y + 18, textRect.width - 15, 17), zone, small);
+            }
+            GUI.EndScrollView();
+            if (radar.TryGetNavigationTarget(out _, out var destination))
+                GUI.Label(new Rect(panel.x, rows.yMax + 2, panel.width - 6, 22), destination, small);
+            if (radar.customWaypoint.HasValue && GUI.Button(new Rect(panel.x, rows.yMax + 23, panel.width, 25), "Clear pin", questButton))
+                MinimapRadar.ClearWaypoint();
+        }
+
+        void DrawSiteWaypoint(Rect button, string name, Vector3 point)
+        {
+            if (!GUI.Button(button, name, questButton)) return;
+            MinimapRadar.SetWaypoint(point, name);
+            player.MapOpen = false;
+        }
+
+        void DrawAtlasRiver(Rect area)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+            if (atlasRiverBanks == null)
+            {
+                var river = GameObject.Find("Westbank flowing river");
+                var filter = river ? river.GetComponent<MeshFilter>() : null;
+                if (!filter || !filter.sharedMesh || !filter.sharedMesh.isReadable) return;
+                // The authored mesh stores a left/right bank pair at each point of the river.
+                atlasRiverBanks = filter.sharedMesh.vertices;
+                for (int i = 0; i < atlasRiverBanks.Length; i++)
+                    atlasRiverBanks[i] = filter.transform.TransformPoint(atlasRiverBanks[i]);
+            }
+            for (int i = 2; i + 1 < atlasRiverBanks.Length; i += 2)
+            {
+                Vector2 from = MapPoint(area, (atlasRiverBanks[i - 2] + atlasRiverBanks[i - 1]) * .5f);
+                Vector2 to = MapPoint(area, (atlasRiverBanks[i] + atlasRiverBanks[i + 1]) * .5f);
+                float width = Vector2.Distance(MapPoint(area, atlasRiverBanks[i]), MapPoint(area, atlasRiverBanks[i + 1]));
+                DrawAtlasSegment(from, to, width, new Color(.21f, .47f, .53f));
+            }
+        }
+
+        void DrawAtlasLabel(Rect area, Vector3 position, string text)
+        {
+            Vector2 point = MapPoint(area, position);
+            var ink = new GUIStyle(small) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold, wordWrap = false };
+            ink.normal.textColor = new Color(.16f, .11f, .07f);
+            float width = ink.CalcSize(new GUIContent(text)).x + 12;
+            var caption = new Rect(Mathf.Clamp(point.x - width / 2, area.x + 2, area.xMax - width - 2),
+                Mathf.Clamp(point.y - 25, area.y + 2, area.yMax - 22), width, 19);
+            Fill(caption, new Color(1f, .93f, .76f, .90f));
+            GUI.Label(caption, text, ink);
+        }
+
+        void DrawAtlasDestination(Rect area)
+        {
+            var radar = MinimapRadar.Instance;
+            if (!radar || !radar.TryGetNavigationTarget(out var position, out var caption)) return;
+            if (BrassHollows.Current && BrassHollows.Inside(position)) position = BrassHollows.Current.Entrance;
+            if (WorldRegions.Expanded && WorldRegions.Underground(position)) position = WorldRegions.Cathedral;
+            Vector2 point = MapPoint(area, position);
+            var matrix = GUI.matrix;
+            GUI.matrix = matrix * Matrix4x4.TRS(point, Quaternion.Euler(0f, 0f, 45f), Vector3.one);
+            Fill(new Rect(-7, -7, 14, 14), new Color(.20f, .13f, .07f));
+            Fill(new Rect(-5, -5, 10, 10), new Color(1f, .79f, .28f));
+            GUI.matrix = matrix;
+            if (!WorldRegions.Expanded) Mark(area, position, caption, Color.white, 0);
+        }
+
+        static Texture2D CreateAtlasRelief()
+        {
+            var terrains = Terrain.activeTerrains;
+            if (terrains.Length == 0) return null;
+            const int size = 256;
+            Rect bounds = WorldRegions.Bounds;
+            var elevations = new float[size * size];
+            var pixels = new Color32[elevations.Length];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                var position = new Vector3(bounds.xMin + (x + .5f) * bounds.width / size, 0,
+                    bounds.yMin + (y + .5f) * bounds.height / size);
+                elevations[y * size + x] = WorldRegions.GroundHeight(position, terrains);
+            }
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                int i = y * size + x;
+                float height = elevations[i];
+                float east = elevations[y * size + Mathf.Min(x + 1, size - 1)] - height;
+                float north = elevations[Mathf.Min(y + 1, size - 1) * size + x] - height;
+                float slope = Mathf.Sqrt(east * east + north * north);
+                float light = Mathf.Clamp((north - east) * .05f, -.24f, .24f);
+                var ink = Color.Lerp(new Color(.42f, .53f, .29f), new Color(.64f, .45f, .31f),
+                    Mathf.Clamp01((height - 12f) / 40f + slope * .07f));
+                ink = Color.Lerp(ink, new Color(.94f, .93f, .84f), Mathf.SmoothStep(0, 1, Mathf.InverseLerp(45, 72, height)));
+                float contour = Mathf.Abs(height / 8f - Mathf.Round(height / 8f));
+                if (height > 4f && slope > .45f && contour < .07f) light -= .10f;
+                ink += new Color(light, light, light, 0);
+                ink.a = .72f;
+                pixels[i] = ink;
+            }
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            texture.SetPixels32(pixels);
+            texture.Apply(false, true);
+            return texture;
         }
 
         Vector2 MapPoint(Rect area, Vector3 position)
@@ -266,9 +487,19 @@ namespace Riftbound
         }
         void MapLine(Rect area, Vector3 from, Vector3 to)
         {
-            Vector2 a = MapPoint(area, from), b = MapPoint(area, to); var matrix = GUI.matrix;
-            GUIUtility.RotateAroundPivot(Mathf.Atan2(b.y - a.y, b.x - a.x) * Mathf.Rad2Deg, a);
-            Fill(new Rect(a.x, a.y - 2, Vector2.Distance(a, b), 4), new Color(.54f, .43f, .28f)); GUI.matrix = matrix;
+            DrawAtlasSegment(MapPoint(area, from), MapPoint(area, to), 4f, new Color(.54f, .43f, .28f));
+        }
+
+        void DrawAtlasSegment(Vector2 from, Vector2 to, float width, Color color)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+            var delta = to - from;
+            if (delta.sqrMagnitude < .001f) return;
+            var matrix = GUI.matrix;
+            float angle = Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg;
+            GUI.matrix = matrix * Matrix4x4.TRS(from, Quaternion.Euler(0f, 0f, angle), Vector3.one);
+            Fill(new Rect(-.4f, -width * .5f, delta.magnitude + .8f, width), color);
+            GUI.matrix = matrix;
         }
     }
 }

@@ -7,15 +7,15 @@ TerrainLayer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Earthen trail
-  m_DiffuseTexture: {fileID: 2800000, guid: 883f0c239382ac14f8bc5007be506f0f, type: 3}
-  m_NormalMapTexture: {fileID: 2800000, guid: 41da32ed0ecaa84498071030184f75d7, type: 3}
+  m_DiffuseTexture: {fileID: 2800000, guid: 29aaf3dd15e6b1143bd270fac1838fd3, type: 3}
+  m_NormalMapTexture: {fileID: 2800000, guid: 8f5248c8d95de854c81dc5272aacc2a2, type: 3}
   m_MaskMapTexture: {fileID: 0}
-  m_TileSize: {x: 5, y: 5}
+  m_TileSize: {x: 6.8, y: 6.8}
   m_TileOffset: {x: 0, y: 0}
   m_Specular: {r: 0, g: 0, b: 0, a: 0}
   m_Metallic: 0
-  m_Smoothness: 0.08
-  m_NormalScale: 0.85
+  m_Smoothness: 0.055
+  m_NormalScale: 0.24
   m_DiffuseRemapMin: {x: 0, y: 0, z: 0, w: 0}
   m_DiffuseRemapMax: {x: 1, y: 1, z: 1, w: 1}
   m_MaskMapRemapMin: {x: 0, y: 0, z: 0, w: 0}

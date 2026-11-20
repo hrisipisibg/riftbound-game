@@ -13,33 +13,9 @@ namespace Riftbound.Editor
     /// Only writes to the four "World tile" TerrainData assets and new prefab wrappers; scene objects are untouched.
     /// Safe to re-run (it replaces previous trees/details). Run it with Outpost-Expanded.unity open.
     /// </summary>
-    [InitializeOnLoad]
     public static class WorldDressingPass
     {
         const string Marker = "WorldDressingResult.txt";
-        static WorldDressingPass() { EditorApplication.delayCall += AutoRunOnce; }
-
-        // Runs once automatically when the expanded world is the open scene; delete WorldDressingResult.txt to run again.
-        static void AutoRunOnce()
-        {
-            if (Application.isBatchMode || File.Exists(Marker)) return;
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating) { EditorApplication.delayCall += AutoRunOnce; return; }
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
-            var scene = EditorSceneManager.GetActiveScene();
-            if (scene.path != WorldRegions.ScenePath) return;
-            if (GameObject.Find(MapLandscapePass.Dressing)) return;
-            bool wasDirty = scene.isDirty;
-            try
-            {
-                Directory.CreateDirectory("Assets/RPG/Scenes/Backups");
-                if (!wasDirty) AssetDatabase.CopyAsset(scene.path, "Assets/RPG/Scenes/Backups/Outpost-Expanded-before-dressing.unity");
-                Run(true);
-                if (!wasDirty) EditorSceneManager.SaveScene(scene);
-                File.WriteAllText(Marker, "Dressed " + DateTime.Now);
-            }
-            catch (Exception e) { Debug.LogException(e); File.WriteAllText(Marker, "FAILED: " + e); }
-        }
-
         const string NatureDir = "Assets/RPG/Art/Nature/";
         const string MatDir = "Assets/RPG/Materials/";
         const string PrefabDir = "Assets/RPG/Prefabs/Nature/";

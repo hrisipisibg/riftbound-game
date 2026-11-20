@@ -23,9 +23,23 @@ namespace Riftbound
         public string SavePath => string.IsNullOrEmpty(SavePathOverride) ? Path.Combine(Application.persistentDataPath, string.IsNullOrEmpty(CharacterSaveId) ? "adventure-v1.json" : "adventure-" + CharacterSaveId + ".json") : SavePathOverride;
         readonly HashSet<string> defeatedEnemies = new HashSet<string>();
         readonly HashSet<string> collectedSupplies = new HashSet<string>();
-        public int Level => Experience >= 650 ? 5 : Experience >= 420 ? 4 : Experience >= 240 ? 3 : Experience >= 100 ? 2 : 1;
-        public int LevelFloor => Level == 5 ? 650 : Level == 4 ? 420 : Level == 3 ? 240 : Level == 2 ? 100 : 0;
-        public int NextLevelExperience => Level == 5 ? 650 : Level == 4 ? 650 : Level == 3 ? 420 : Level == 2 ? 240 : 100;
+        static readonly int[] LevelThresholds =
+        {
+            0, 100, 240, 420, 650, 900, 1160, 1430, 1710, 2000,
+            2300, 2610, 2930, 3260, 3600, 3950, 4310, 4680, 5060, 5450,
+            5850, 6260, 6680, 7110, 7550
+        };
+        public static int MaxLevel => LevelThresholds.Length;
+        public int Level
+        {
+            get
+            {
+                int index = Array.BinarySearch(LevelThresholds, Experience);
+                return index >= 0 ? index + 1 : ~index;
+            }
+        }
+        public int LevelFloor => LevelThresholds[Level - 1];
+        public int NextLevelExperience => LevelThresholds[Mathf.Min(Level, MaxLevel - 1)];
         public string QuestName => QuestIndex == 0 ? "The Forest Road" : QuestIndex == 1 ? "Stolen Supplies" : QuestIndex == 2 ? "The Ashwood Captain" : "Hero of Emberwatch";
         public int QuestGold => QuestIndex == 0 ? 25 : QuestIndex == 1 ? 35 : 60;
         public int QuestExperience => QuestIndex == 0 ? 80 : QuestIndex == 1 ? 100 : 180;
@@ -103,8 +117,11 @@ namespace Riftbound
             {
                 if (Stats != null) Stats.Heal(Stats.maxHealth);
                 SpellFX.CreateLevelUpBurst(transform.position);
-                ZoneBanner.Show($"LEVEL {Level}!", "Power Increased — Check Talents [N]");
-                Message = $"★ LEVEL {Level}! Health and damage increased. [N] Talents";
+                bool unlockedMilestone = MilestoneTalentsAvailable &&
+                    Level / MilestoneTalents.LevelsPerTier > previousLevel / MilestoneTalents.LevelsPerTier;
+                string reward = unlockedMilestone ? "New milestone talent available [N]" : "Health and damage increased";
+                ZoneBanner.Show($"LEVEL {Level}!", reward);
+                Message = $"Level {Level}! {reward}.";
                 AudioEffects.PlayLevelUp();
                 ChatSystem.LogSystem($"Congratulations! You have reached Level {Level}!");
             }
@@ -130,6 +147,8 @@ namespace Riftbound
         }
         public void RefreshAdventureWorld()
         {
+            WesternRoadCamps.Ensure(this);
+            BrassHollows.Ensure();
             CharacterVisualFactory.ApplyToPlayer(this, CharacterRace, CharacterClass);
             foreach (var enemy in FindObjectsByType<EnemyController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
@@ -143,6 +162,8 @@ namespace Riftbound
         [Serializable] public class AdventureSave
         {
             public int version = 1, questIndex, kills, gold, experience, potions;
+            public int westernRoadStage;
+            public int brassHollowsStage;
             public bool accepted, bossDefeated, weaponUpgraded, temperedWeapon;
             public string[] enemies, supplies, chests;
             public string[] items;
@@ -157,6 +178,8 @@ namespace Riftbound
             public LootDropSystem.SavedCorpse[] corpses;
             public int[] talentRanksA;
             public int[] talentRanksB;
+            public string[] milestoneChoices;
+            public string[] milestoneBindings;
             public bool hasPosition;
             public int worldRevision;
             public float posX, posY, posZ;
@@ -170,6 +193,10 @@ namespace Riftbound
                 var (tA, tB) = TalentSystem.ExportRanks(CharacterClass);
                 data.talentRanksA = tA;
                 data.talentRanksB = tB;
+                data.milestoneChoices = milestoneChoices;
+                data.milestoneBindings = milestoneBindings;
+                data.westernRoadStage = WesternRoadStage;
+                data.brassHollowsStage = BrassHollowsStage;
                 data.lootOnCorpses = true;
                 data.worldRevision = WorldRegions.Expanded ? 1 : 0;
                 data.corpses = LootDropSystem.Instance ? LootDropSystem.Instance.ExportCorpses() : null;
@@ -179,9 +206,12 @@ namespace Riftbound
                 if (!FrontendMenu.IsOpen)
                 {
                     data.hasPosition = true;
-                    data.posX = transform.position.x;
-                    data.posY = transform.position.y;
-                    data.posZ = transform.position.z;
+                    // Reload at the trailhead while retaining cave kills and quest progress.
+                    Vector3 savePosition = BrassHollows.Inside(transform.position) && BrassHollows.Current
+                        ? BrassHollows.Current.Entrance - Vector3.forward * 2f : transform.position;
+                    data.posX = savePosition.x;
+                    data.posY = savePosition.y;
+                    data.posZ = savePosition.z;
                 }
                 Directory.CreateDirectory(Path.GetDirectoryName(SavePath));
                 File.WriteAllText(SavePath + ".tmp", JsonUtility.ToJson(data, true));
@@ -263,6 +293,9 @@ namespace Riftbound
 
         public void LoadAdventure()
         {
+            WesternRoadStage = 0;
+            BrassHollowsStage = 0;
+            RestoreMilestoneTalents(null, null);
             if (!File.Exists(SavePath))
             {
                 Vector3 racialSpawn = GetRacialSpawnPosition();
@@ -284,6 +317,8 @@ namespace Riftbound
             {
                 var data = JsonUtility.FromJson<AdventureSave>(File.ReadAllText(SavePath));
                 if (data == null || data.version != 1) return;
+                WesternRoadStage = Mathf.Clamp(data.westernRoadStage, 0, 4);
+                BrassHollowsStage = Mathf.Clamp(data.brassHollowsStage, 0, 3);
                 QuestIndex = Mathf.Clamp(data.questIndex, 0, 3); QuestComplete = QuestIndex >= 3; QuestAccepted = !QuestComplete && data.accepted;
                 Kills = Mathf.Max(0, data.kills); Gold = Mathf.Max(0, data.gold); Experience = Mathf.Max(0, data.experience); Potions = Mathf.Max(0, data.potions);
                 BossDefeated = data.bossDefeated; WeaponUpgraded = data.weaponUpgraded;
@@ -334,6 +369,7 @@ namespace Riftbound
                 }
                 else transform.position = targetPos;
 
+                RestoreMilestoneTalents(data.milestoneChoices, data.milestoneBindings);
                 TalentSystem.ImportRanks(this, data.talentRanksA, data.talentRanksB);
                 RestoreMountSelection(data.mount);
                 RestoreEquipment(data); Stats.Restore();

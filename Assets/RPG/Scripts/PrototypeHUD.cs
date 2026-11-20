@@ -16,8 +16,15 @@ namespace Riftbound
         string activeMicroTip = "";
         Rect activeMicroTipRect;
         Texture2D white;
-        internal static float LayoutScale => Mathf.Min(Screen.width / 1040f, Screen.height / 720f);
-
+        const string PointerXPref = "Riftbound.QuestPointerX";
+        const string PointerYPref = "Riftbound.QuestPointerY";
+        const float PointerWidth = 242f, PointerHeight = 120f, PointerMargin = 8f;
+        static PrototypeHUD pointerOwner;
+        Texture2D questArrow;
+        GUIStyle pointerCaptionStyle, pointerDetailStyle;
+        Vector2 pointerAnchor, pointerDragOffset;
+        bool pointerPositionLoaded;
+        int pointerDragControl;
         void Start()
         {
             // Region discovery has a top-screen ZoneBanner; legacy 3D floating captions duplicate it.
@@ -31,6 +38,8 @@ namespace Riftbound
             }
             ExplorationSites.Ensure();
             RiverReaverCamp.Ensure();
+            if (player) WesternRoadCamps.Ensure(player);
+            BrassHollows.Ensure();
             RoadPatrolGuard.Ensure();
             if (!ActionBarSystem.Instance && !GetComponent<ActionBarSystem>()) gameObject.AddComponent<ActionBarSystem>();
             if (!CathedralBossEncounter.Instance && !GetComponent<CathedralBossEncounter>()) gameObject.AddComponent<CathedralBossEncounter>();
@@ -65,7 +74,11 @@ namespace Riftbound
         }
         void OnGUI()
         {
-            if (!player || !player.Stats || FrontendMenu.IsOpen) return;
+            if (!player || !player.Stats || FrontendMenu.IsOpen)
+            {
+                FinishPointerDrag();
+                return;
+            }
             if (white == null)
             {
                 white = Texture2D.whiteTexture;
@@ -141,9 +154,12 @@ namespace Riftbound
                     GUI.Label(new Rect(point.x - 100, rect.y - 25, 200, 23), tagText, nameplate);
                 }
             }
-            float scale = LayoutScale;
-            GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, Vector3.one * scale);
+            float scale = Mathf.Min(Screen.width / 1280f, Screen.height / 720f);
+            var hudMatrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
+            GUI.matrix = hudMatrix;
             float width = Screen.width / scale, height = Screen.height / scale;
+            int pointerId = GUIUtility.GetControlID(FocusType.Passive);
+            if (Event.current.type != EventType.Repaint) DrawQuestPointer(width, height, pointerId);
             activeMicroTip = "";
 
             // --- 1. Low-Profile Player Unit Frame (WoW Style: Portrait ring + Name/Title + HP + Resource + XP) ---
@@ -246,7 +262,40 @@ namespace Riftbound
                 }
             }
 
-            DrawObjectiveTracker(width);
+            // Keep the world visible: show only active objectives, with details in the journal.
+            float qtw = 236f, qtx = width - qtw - 20f;
+            float qty = (MinimapRadar.Instance != null && MinimapRadar.Instance.showMinimap) ? MinimapRadar.TrackerTop : 20f;
+            var fqs = FactionQuestSystem.Instance;
+            var fq = fqs != null ? fqs.GetActiveQuest() : null;
+            bool hasObjective = fq != null || player.QuestAccepted;
+            if (hasObjective)
+            {
+                Fill(new Rect(qtx, qty, qtw, 28f), new Color(.055f, .065f, .08f, .84f));
+                Fill(new Rect(qtx, qty, 2f, 28f), new Color(.66f, .55f, .33f, .85f));
+                if (GUI.Button(new Rect(qtx + 10f, qty + 3f, qtw - 18f, 23f), questTrackerCollapsed ? "OBJECTIVES  +" : "OBJECTIVES  -", small))
+                {
+                    questTrackerCollapsed = !questTrackerCollapsed;
+                    AudioEffects.PlayClick();
+                }
+                if (!questTrackerCollapsed)
+                {
+                    float rows = fq != null && player.QuestAccepted ? 2f : 1f;
+                    Fill(new Rect(qtx, qty + 28f, qtw, rows * 58f + 8f), new Color(.045f, .055f, .07f, .72f));
+                    float objectiveY = qty + 35f;
+                    if (fq != null)
+                    {
+                        GUI.Label(new Rect(qtx + 12f, objectiveY, qtw - 24f, 22f), fq.title, label);
+                        string objective = fqs.IsActiveQuestReady() ? "Return to " + fq.giverNpc : $"{fq.targetName}: {fqs.CurrentProgress}/{fq.requiredCount}";
+                        GUI.Label(new Rect(qtx + 12f, objectiveY + 23f, qtw - 24f, 32f), objective, small);
+                        objectiveY += 58f;
+                    }
+                    if (player.QuestAccepted)
+                    {
+                        GUI.Label(new Rect(qtx + 12f, objectiveY, qtw - 24f, 22f), player.QuestName, label);
+                        GUI.Label(new Rect(qtx + 12f, objectiveY + 23f, qtw - 24f, 32f), player.QuestObjective, small);
+                    }
+                }
+            }
 
             if (!player.DialogueOpen)
             {
@@ -391,54 +440,185 @@ namespace Riftbound
             if (ApexBossEncounter.Instance) ApexBossEncounter.Instance.DrawBossFrameGUI(width, height);
             if (PetCompanionSystem.Instance) PetCompanionSystem.Instance.DrawPetFrameGUI(width, height);
 
+            if (Event.current.type == EventType.Repaint)
+            {
+                GUI.matrix = hudMatrix;
+                DrawQuestPointer(width, height, pointerId);
+            }
             GUI.matrix = oldMatrix;
         }
-
-        void DrawObjectiveTracker(float width)
+        void OnDestroy()
         {
-            var radar = MinimapRadar.Instance;
-            var factionQuests = FactionQuestSystem.Instance;
-            var secondary = factionQuests ? factionQuests.GetActiveQuest() : null;
-            bool main = player.QuestAccepted || (!player.QuestComplete && player.questGiver && player.questGiver.gameObject.activeInHierarchy);
-            if (!main && secondary == null) return;
-
-            const float cardWidth = 252f;
-            float x = width - cardWidth - 20f;
-            float y = radar && radar.RadarVisible ? 192f : 58f;
-            float mainHeight = main ? (radar ? 110f : 80f) : 0;
-            float body = mainHeight + (secondary != null ? 63f : 0);
-            float cardHeight = questTrackerCollapsed ? 31f : 31f + body;
-            Fill(new Rect(x, y, cardWidth, cardHeight), new Color(.045f, .055f, .07f, .91f));
-            Fill(new Rect(x, y, cardWidth, 2f), new Color(.66f, .55f, .33f, .95f));
-            GUI.Label(new Rect(x + 12f, y + 7f, cardWidth - 48f, 22f), "Objectives", label);
-            if (GUI.Button(new Rect(x + cardWidth - 37f, y + 6f, 27f, 21f), questTrackerCollapsed ? "+" : "−", microBtnStyle))
-            {
-                questTrackerCollapsed = !questTrackerCollapsed;
-                AudioEffects.PlayClick();
-            }
-            if (questTrackerCollapsed) return;
-
-            y += 36f;
-            if (main)
-            {
-                GUI.Label(new Rect(x + 12f, y, cardWidth - 24f, 22f), player.QuestName, label);
-                GUI.Label(new Rect(x + 12f, y + 24f, cardWidth - 24f, 42f), player.QuestObjective, small);
-                if (radar && GUI.Button(new Rect(x + 12f, y + 67f, cardWidth - 24f, 25f), radar.TrackingMainQuest ? "Stop tracking" : "Track on minimap", microBtnStyle))
-                {
-                    if (radar.TrackingMainQuest) MinimapRadar.ClearWaypoint();
-                    else radar.TrackMainQuest();
-                }
-                y += mainHeight;
-            }
-
-            if (secondary != null)
-            {
-                GUI.Label(new Rect(x + 12f, y, cardWidth - 24f, 22f), secondary.title, label);
-                string objective = factionQuests.IsActiveQuestReady() ? "Return to " + secondary.giverNpc : $"{secondary.targetName}: {factionQuests.CurrentProgress}/{secondary.requiredCount}";
-                GUI.Label(new Rect(x + 12f, y + 23f, cardWidth - 24f, 32f), objective, small);
-            }
+            MenuOpen = false;
+            if (pointerOwner == this) pointerOwner = null;
+            if (questArrow) Destroy(questArrow);
+            if (atlasRelief) Destroy(atlasRelief);
         }
-        void OnDestroy() { MenuOpen = false; }
+
+        static bool PointerContains(Rect rect, Vector2 point) =>
+            rect.Contains(point) && (point.y >= rect.y + 76f || Mathf.Abs(point.x - rect.center.x) <= 38f);
+
+        bool TryGetPointerDestination(out Vector3 target, out string caption)
+        {
+            target = default;
+            caption = null;
+            var radar = MinimapRadar.Instance;
+            return player && player.Stats && player.Stats.Alive && !FrontendMenu.IsOpen && !MenuOpen &&
+                !player.AnyBlockingWindowOpen() && !(player.orbit && player.orbit.Paused) &&
+                radar && radar.TryGetNavigationTarget(out target, out caption);
+        }
+
+        Rect QuestPointerRect(float width, float height)
+        {
+            if (!pointerPositionLoaded)
+            {
+                pointerAnchor = new Vector2(Mathf.Clamp01(PlayerPrefs.GetFloat(PointerXPref, .5f)),
+                    Mathf.Clamp01(PlayerPrefs.GetFloat(PointerYPref, .035f)));
+                pointerPositionLoaded = true;
+            }
+            return new Rect(PointerMargin + pointerAnchor.x * (width - PointerWidth - 2 * PointerMargin),
+                PointerMargin + pointerAnchor.y * (height - PointerHeight - 2 * PointerMargin), PointerWidth, PointerHeight);
+        }
+
+        // The camera and target selection read mouse input independently of IMGUI.
+        internal static bool QuestPointerTakesMouse(PlayerController source, Vector2 screenPoint, bool leftPress)
+        {
+            if (!pointerOwner || pointerOwner.player != source ||
+                (!leftPress && pointerOwner.pointerDragControl == 0) ||
+                !pointerOwner.TryGetPointerDestination(out _, out _))
+                return false;
+            if (pointerOwner.pointerDragControl != 0) return true;
+            float scale = Mathf.Min(Screen.width / 1280f, Screen.height / 720f);
+            if (scale <= 0f) return false;
+            var guiPoint = new Vector2(screenPoint.x, Screen.height - screenPoint.y) / scale;
+            return PointerContains(pointerOwner.QuestPointerRect(Screen.width / scale, Screen.height / scale), guiPoint);
+        }
+
+        void FinishPointerDrag()
+        {
+            if (pointerDragControl == 0) return;
+            if (GUIUtility.hotControl == pointerDragControl) GUIUtility.hotControl = 0;
+            pointerDragControl = 0;
+            PlayerPrefs.SetFloat(PointerXPref, pointerAnchor.x);
+            PlayerPrefs.SetFloat(PointerYPref, pointerAnchor.y);
+            PlayerPrefs.Save();
+        }
+
+        void DrawQuestPointer(float width, float height, int id)
+        {
+            if (!TryGetPointerDestination(out var target, out var caption))
+            {
+                FinishPointerDrag();
+                return;
+            }
+
+            pointerOwner = this;
+            var rect = QuestPointerRect(width, height);
+            var input = Event.current;
+            if (pointerDragControl != 0 && (GUIUtility.hotControl != pointerDragControl || !Application.isFocused))
+                FinishPointerDrag();
+
+            if (pointerDragControl != 0)
+            {
+                if (input.type == EventType.MouseDrag)
+                {
+                    Vector2 origin = input.mousePosition - pointerDragOffset;
+                    pointerAnchor = new Vector2(
+                        Mathf.InverseLerp(PointerMargin, width - PointerWidth - PointerMargin, origin.x),
+                        Mathf.InverseLerp(PointerMargin, height - PointerHeight - PointerMargin, origin.y));
+                    input.Use();
+                }
+                else if (input.type == EventType.MouseUp && input.button == 0)
+                {
+                    FinishPointerDrag();
+                    input.Use();
+                }
+                else if (input.type == EventType.Ignore) FinishPointerDrag();
+            }
+            else if (input.type == EventType.MouseDown && input.button == 0 &&
+                GUIUtility.hotControl == 0 && PointerContains(rect, input.mousePosition))
+            {
+                pointerDragOffset = input.mousePosition - rect.position;
+                pointerDragControl = GUIUtility.hotControl = id;
+                input.Use();
+            }
+            if (input.type != EventType.Repaint) return;
+
+            if (WorldRegions.Expanded && WorldRegions.Underground(target) && !WorldRegions.Underground(player.transform.position))
+                target = WorldRegions.Cathedral;
+            Vector3 offset = target - player.transform.position;
+            offset.y = 0;
+            float distance = offset.magnitude;
+            var camera = Camera.main;
+            float heading = camera ? camera.transform.eulerAngles.y : player.transform.eulerAngles.y;
+            float bearing = Mathf.Atan2(offset.x, offset.z) * Mathf.Rad2Deg - heading;
+            bool arrived = distance <= 3f;
+            Color accent = arrived ? new Color(.57f, .98f, .81f) : Color.Lerp(
+                new Color(.51f, .96f, .77f), new Color(1f, .72f, .34f),
+                Mathf.InverseLerp(20f, 150f, Mathf.Abs(Mathf.DeltaAngle(0f, bearing))));
+            var icon = new Vector2(rect.center.x, rect.y + 38f);
+            var matrix = GUI.matrix;
+            // Draw at the local origin so the rotation cannot move the HUD anchor.
+            GUI.matrix = matrix * Matrix4x4.TRS(new Vector3(icon.x, icon.y, 0f),
+                Quaternion.Euler(0f, 0f, arrived ? 45f : bearing), Vector3.one);
+            if (arrived)
+            {
+                Fill(new Rect(-12f, -12f, 24f, 24f), new Color(.05f, .12f, .13f));
+                Fill(new Rect(-9f, -9f, 18f, 18f), accent);
+            }
+            else
+            {
+                if (!questArrow) questArrow = CreateQuestArrow();
+                var tint = GUI.color;
+                GUI.color = accent;
+                GUI.DrawTexture(new Rect(-35f, -35f, 70f, 70f), questArrow);
+                GUI.color = tint;
+            }
+            GUI.matrix = matrix;
+
+            var plate = new Rect(rect.x, rect.y + 76f, rect.width, 44f);
+            bool hover = pointerDragControl != 0 || PointerContains(rect, input.mousePosition);
+            Fill(plate, new Color(.027f, .043f, .056f, hover ? .96f : .82f));
+            if (hover) Fill(new Rect(plate.center.x - 14f, plate.y, 28f, 2f), accent);
+            pointerCaptionStyle ??= new GUIStyle(label)
+            {
+                alignment = TextAnchor.MiddleCenter, wordWrap = false, clipping = TextClipping.Clip, fontStyle = FontStyle.Bold
+            };
+            pointerDetailStyle ??= new GUIStyle(small)
+            {
+                alignment = TextAnchor.MiddleCenter, wordWrap = false, clipping = TextClipping.Clip
+            };
+            pointerCaptionStyle.normal.textColor = accent;
+            GUI.Label(new Rect(plate.x + 5f, plate.y + 2f, plate.width - 10f, 21f), caption, pointerCaptionStyle);
+            GUI.Label(new Rect(plate.x + 5f, plate.y + 22f, plate.width - 10f, 19f),
+                arrived ? "At destination" : $"{distance:0} m · {WorldRegions.ZoneName(target)}", pointerDetailStyle);
+        }
+
+        static Texture2D CreateQuestArrow()
+        {
+            const int size = 96;
+            var pixels = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float lateral = Mathf.Abs((x + .5f) / size - .5f);
+                // Center the painted silhouette between its tip and wing corners.
+                float height = (y + .5f) / size + .036f;
+                // Swept wings meet at the tip and the tail has a shallow V cut.
+                float side = (.88f - height) * .55f - lateral;
+                float tail = height - (.37f - lateral * .47f);
+                float edge = Mathf.Min(side, tail);
+                float alpha = Mathf.Clamp01(edge * size + .5f);
+                float bevel = Mathf.Clamp01((edge - .022f) * size);
+                float facet = (x < size / 2 ? .96f : .68f) + (height - .5f) * .35f;
+                float light = Mathf.Lerp(.085f, facet, bevel);
+                pixels[y * size + x] = new Color(light, light, light, alpha);
+            }
+            var arrow = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            arrow.SetPixels32(pixels);
+            arrow.Apply(false, true);
+            return arrow;
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetMenu() { MenuOpen = false; }
@@ -452,19 +632,19 @@ namespace Riftbound
 
             // Sleek dark panel with warm gold border
             Fill(new Rect(badgeX - 1f, badgeY - 1f, badgeW + 2f, badgeH + 2f), new Color(0.35f, 0.28f, 0.14f, 0.90f));
-            Fill(new Rect(badgeX, badgeY, badgeW, badgeH), new Color(0.06f, 0.08f, 0.11f, 0.94f));
+            Fill(new Rect(badgeX, badgeY, badgeW, badgeH), new Color(0.04f, 0.055f, 0.08f, 0.99f));
 
             // Gold key badge
             float keyW = 28f, keyH = 22f;
             float keyX = badgeX + 6f, keyY = badgeY + 6f;
-            Fill(new Rect(keyX, keyY, keyW, keyH), new Color(0.86f, 0.68f, 0.25f, 1f));
+            Fill(new Rect(keyX, keyY, keyW, keyH), new Color(1f, 0.81f, 0.43f, 1f));
             var keyStyle = new GUIStyle(small) { fontSize = 13, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
             keyStyle.normal.textColor = new Color(0.08f, 0.06f, 0.02f);
             GUI.Label(new Rect(keyX, keyY - 1f, keyW, keyH), key, keyStyle);
 
             // Action label
             var textStyle = new GUIStyle(label) { fontSize = 14, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleLeft };
-            textStyle.normal.textColor = new Color(0.95f, 0.92f, 0.85f);
+            textStyle.normal.textColor = Color.white;
             GUI.Label(new Rect(keyX + keyW + 8f, badgeY + 4f, badgeW - keyW - 14f, 26f), promptText, textStyle);
         }
 
@@ -547,7 +727,7 @@ namespace Riftbound
                 Panel(new Rect(x, y, 460f, 240f));
                 GUI.Label(new Rect(x + 20f, y + 14f, 380f, 28f), "GAME CONTROLS & SHORTCUTS", title);
                 GUI.Label(new Rect(x + 20f, y + 50f, 420f, 130f),
-                    "<b>Movement:</b> WASD to Move · Space to Jump · C to Slow Walk\n" +
+                    "<b>Movement:</b> WASD relative to camera · Left/Right arrows to turn · Space to jump · C to slow walk\n" +
                     "<b>Camera:</b> Hold Right-Click to steer · Left-Click to orbit · Wheel to zoom\n" +
                     "<b>Combat:</b> 1-3 Abilities · 4 Health Potion · F Interrupt · Q Shield Block\n" +
                     "<b>World:</b> E to Interact/Talk · Z Mount · V Cycle Mount · H Hearthstone\n" +

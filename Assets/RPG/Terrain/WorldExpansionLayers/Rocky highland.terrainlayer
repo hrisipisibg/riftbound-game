@@ -7,15 +7,15 @@ TerrainLayer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Rocky highland
-  m_DiffuseTexture: {fileID: 2800000, guid: fcda4e93d86e482cad1f0cc20a43600b, type: 3}
-  m_NormalMapTexture: {fileID: 2800000, guid: 881c613de4554227bb674de6e357893d, type: 3}
+  m_DiffuseTexture: {fileID: 2800000, guid: b8ad42a0f25918f4c977d61d6c7cefe2, type: 3}
+  m_NormalMapTexture: {fileID: 2800000, guid: 9f7e27dc8558857439d6140d2a934534, type: 3}
   m_MaskMapTexture: {fileID: 0}
-  m_TileSize: {x: 12, y: 12}
+  m_TileSize: {x: 10.5, y: 10.5}
   m_TileOffset: {x: 0, y: 0}
   m_Specular: {r: 0, g: 0, b: 0, a: 0}
   m_Metallic: 0
-  m_Smoothness: 0.06
-  m_NormalScale: 0.45
+  m_Smoothness: 0.055
+  m_NormalScale: 0.32
   m_DiffuseRemapMin: {x: 0, y: 0, z: 0, w: 0}
   m_DiffuseRemapMax: {x: 1, y: 1, z: 1, w: 1}
   m_MaskMapRemapMin: {x: 0, y: 0, z: 0, w: 0}

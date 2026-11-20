@@ -177,11 +177,12 @@ namespace Riftbound
             float lowest = float.PositiveInfinity;
             float ankle = Mathf.Min(leftFoot.position.y, rightFoot.position.y);
             var mesh = new Mesh();
+            var replacement = animator.transform.Find("Emberford Body");
             try
             {
                 foreach (var skin in animator.GetComponentsInChildren<SkinnedMeshRenderer>())
                 {
-                    if (!skin.sharedMesh) continue;
+                    if (!skin.sharedMesh || replacement && skin.transform.IsChildOf(replacement)) continue;
                     skin.BakeMesh(mesh);
                     foreach (var vertex in mesh.vertices)
                     {

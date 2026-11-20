@@ -100,13 +100,13 @@ namespace Riftbound.Editor
             }
         }
 
-        internal static void Traverse(Route route, bool mounted, bool reverse, CharacterController source, StringBuilder report)
+        internal static void Traverse(Route route, bool mounted, bool reverse, CharacterController source, StringBuilder report, Func<Vector3, Vector3> startSurface = null)
         {
             var points = reverse ? route.points.Reverse().ToArray() : route.points;
             var go = new GameObject("Temporary route probe"); go.layer = 2;
             try
             {
-                go.transform.position = Surface(points[0]) + Vector3.up * .12f;
+                go.transform.position = (startSurface?.Invoke(points[0]) ?? Surface(points[0])) + Vector3.up * .12f;
                 var cc = go.AddComponent<CharacterController>();
                 cc.height = mounted ? 3.6f : (source ? source.height : 1.9f);
                 cc.radius = mounted ? .62f : (source ? source.radius : .42f);

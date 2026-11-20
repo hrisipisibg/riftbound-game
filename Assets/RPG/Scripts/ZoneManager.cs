@@ -93,6 +93,7 @@ namespace Riftbound
             if (WorldRegions.Expanded)
             {
                 string zone = WorldRegions.ZoneName(pos);
+                if (BrassHollows.Inside(pos)) return "Redridge mine";
                 if (WorldRegions.Underground(pos)) return "Cathedral Instance (Dungeon)";
                 if (zone == "Camp Bloodrock" || zone == "Gor'Kresh Stronghold" || zone == "Deathknell Hollow" || zone == "Rustwater Scrapworks") return "Horde Territory";
                 if (zone == "Emberwatch Outpost" || zone == "Highspire Keep" || zone == "Frostpeak Foothills" || zone == "Silverglen Sanctum") return "Alliance Territory";

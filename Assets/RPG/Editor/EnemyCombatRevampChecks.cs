@@ -376,6 +376,35 @@ namespace Riftbound.Editor
                     Check("canonical_host_channel_null_offline_and_rejects_guest_owner", canonicalSafeOffline,
                         $"canonicalSafeOffline={canonicalSafeOffline}");
 
+                    ec.ResetForLoad();
+                    playerGo.transform.position = new Vector3(0f, 0.1f, 7.0f);
+                    wallGo = Track(GameObject.CreatePrimitive(PrimitiveType.Cube));
+                    wallGo.transform.position = new Vector3(0f, 1.1f, 2.8f);
+                    wallGo.transform.localScale = new Vector3(2.8f, 2.5f, .5f);
+                    Physics.SyncTransforms();
+                    Wait(.55);
+                }
+                else if (stage == 12)
+                {
+                    Check("server_does_not_aggro_through_wall", !ec.HasPendingAttack && enemyGo.transform.position.z < .25f,
+                        $"position={enemyGo.transform.position} pending={ec.HasPendingAttack}");
+                    eStats.Damage(3f);
+                    Wait(.95);
+                }
+                else if (stage == 13)
+                {
+                    var position = enemyGo.transform.position;
+                    Check("server_routes_around_blocking_cover", position.z > 1.25f && (Mathf.Abs(position.x) > .8f || position.z > 3.5f),
+                        $"position={position}");
+                    Object.DestroyImmediate(wallGo);
+                    playerGo.transform.position = new Vector3(0f, .1f, 39f);
+                    Wait(2.9);
+                }
+                else if (stage == 14)
+                {
+                    Check("server_returns_home_after_leash", enemyGo.transform.position.sqrMagnitude < 1.3f &&
+                        !ec.HasPendingAttack && Mathf.Approximately(eStats.Health, eStats.maxHealth),
+                        $"position={enemyGo.transform.position} health={eStats.Health}/{eStats.maxHealth}");
                     ec.SetNetClientSimulationForTest(true);
                     ec.ApplyReplicatedState(0f, eStats.maxHealth, false, enemyGo.transform.position, enemyGo.transform.eulerAngles.y);
                     Check("client_replicated_death_marks_enemy_dead_immediately", Mathf.Approximately(eStats.Health, 0f) && !eStats.Alive,

@@ -7,7 +7,8 @@ namespace Riftbound
     {
         public MountDefinition[] mounts;
         public bool Mounted => mountInstance;
-        public bool IsFlying => Mounted && SelectedMount && SelectedMount.isFlying && motor && !motor.isGrounded;
+        bool RidingFlyingMount => Mounted && SelectedMount && SelectedMount.isFlying;
+        public bool IsFlying => RidingFlyingMount && motor && !motor.isGrounded;
         public bool Mounting { get; private set; }
         public float MountProgress => Mounting ? Mathf.Clamp01((Time.time - mountStarted) / 1.5f) : 0;
         public string SelectedMountId { get; private set; } = "horse";

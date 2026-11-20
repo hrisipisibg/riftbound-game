@@ -39,7 +39,7 @@ namespace Riftbound
 
             keybindStyle = new GUIStyle(GUI.skin.label)
             {
-                fontSize = 13,
+                fontSize = 11,
                 fontStyle = FontStyle.Bold,
                 alignment = TextAnchor.UpperLeft
             };
@@ -92,17 +92,17 @@ namespace Riftbound
             InitStyles();
             activeClass = player.CharacterClass;
 
-            const int slotCount = 9;
-            const float slotSize = 51f;
-            const float spacing = 5f;
+            int talentSlots = player.MilestoneTalentsAvailable ? 2 : 0;
+            int slotCount = 9 + talentSlots;
+            float slotSize = 48f;
+            float spacing = 5f;
             float totalBarW = slotCount * slotSize + (slotCount - 1) * spacing;
             float barX = screenW / 2f - totalBarW / 2f;
-            float barY = screenH - 71f;
-
-            GUI.DrawTexture(new Rect(barX - 8f, barY - 10f, totalBarW + 16f, slotSize + 18f), bgTex);
+            float barY = screenH - 68f;
 
             // Sleek, Low-Profile Experience Bar (3.5px) resting on top of Action Slots
-            float xpRatio = player.Level == 5 ? 1f : Mathf.Clamp01((float)(player.Experience - player.LevelFloor) / Mathf.Max(1, player.NextLevelExperience - player.LevelFloor));
+            float xpRatio = player.Level == PlayerController.MaxLevel ? 1f :
+                (float)(player.Experience - player.LevelFloor) / Mathf.Max(1, player.NextLevelExperience - player.LevelFloor);
             GUI.DrawTexture(new Rect(barX, barY - 5f, totalBarW, 3.5f), borderTex);
             var prevGuiCol = GUI.color;
             GUI.color = new Color(0.55f, 0.25f, 0.90f);
@@ -158,11 +158,11 @@ namespace Riftbound
                 hoverDesc = $"Restores 70 Health points instantly.\nYou currently hold {player.Potions} potion(s). Purchase more from town vendors.";
             }
 
-            // Slot 5: Spell Interrupt [F]
+            // Spell Interrupt [F]
             float cdInterrupt = player.InterruptCooldownRemaining;
             string intName = player.InterruptSpellName;
             string intIcon = player.InterruptIcon;
-            Rect intRect = new Rect(barX + (slotSize + spacing) * 4, barY, slotSize, slotSize);
+            Rect intRect = new Rect(barX + (slotSize + spacing) * (4 + talentSlots), barY, slotSize, slotSize);
             if (DrawSlot(intRect, "F", intIcon, "", cdInterrupt, () => player.CastInterruptPublic()))
             {
                 hoverTitle = $"{intName} (Interrupt)";
@@ -184,7 +184,7 @@ namespace Riftbound
             // Slot 6: Guard / Shield Block [Q]
             float cdGuard = Mathf.Max(0f, player.GuardReady - Time.time);
             string guardLabel = player.Blocking ? "ACTIVE" : "";
-            if (DrawSlot(new Rect(barX + (slotSize + spacing) * 5, barY, slotSize, slotSize), "Q", "🛡", guardLabel, cdGuard, () => player.ToggleGuardPublic()))
+            if (DrawSlot(new Rect(barX + (slotSize + spacing) * (5 + talentSlots), barY, slotSize, slotSize), "Q", "🛡", guardLabel, cdGuard, () => player.ToggleGuardPublic()))
             {
                 hoverTitle = "Guard (Shield Block)";
                 hoverSub = "Stance  •  Instant";
@@ -194,7 +194,7 @@ namespace Riftbound
             // Slot 7: Mount [Z]
             string mountIcon = (player.SelectedMount && player.SelectedMount.isFlying) ? "🦅" : "🐎";
             string mountStatus = player.Mounted ? "DISMOUNT" : "SUMMON";
-            if (DrawSlot(new Rect(barX + (slotSize + spacing) * 6, barY, slotSize, slotSize), "Z", mountIcon, mountStatus, 0f, () => player.ToggleMountPublic()))
+            if (DrawSlot(new Rect(barX + (slotSize + spacing) * (6 + talentSlots), barY, slotSize, slotSize), "Z", mountIcon, mountStatus, 0f, () => player.ToggleMountPublic()))
             {
                 hoverTitle = player.Mounted ? "Dismount" : (player.SelectedMount ? player.SelectedMount.displayName : "Celestial Winged Steed");
                 hoverSub = (player.SelectedMount && player.SelectedMount.isFlying) ? "Flying Mount  •  1.5s Cast" : "Ground Mount  •  1.5s Cast";
@@ -203,7 +203,7 @@ namespace Riftbound
 
             // Slot 8: Hearthstone [H]
             float cdHearth = Mathf.Max(0f, player.HearthReady - Time.time);
-            if (DrawSlot(new Rect(barX + (slotSize + spacing) * 7, barY, slotSize, slotSize), "H", "🌀", "", cdHearth, () => player.TriggerHearthstonePublic()))
+            if (DrawSlot(new Rect(barX + (slotSize + spacing) * (7 + talentSlots), barY, slotSize, slotSize), "H", "🌀", "", cdHearth, () => player.TriggerHearthstonePublic()))
             {
                 hoverTitle = "Hearthstone";
                 hoverSub = "5.0s Cast  •  60s Cooldown";
@@ -211,11 +211,26 @@ namespace Riftbound
             }
 
             // Slot 9: World Atlas Map [M]
-            if (DrawSlot(new Rect(barX + (slotSize + spacing) * 8, barY, slotSize, slotSize), "M", "🗺", "MAP", 0f, () => player.ToggleMapPublic()))
+            if (DrawSlot(new Rect(barX + (slotSize + spacing) * (8 + talentSlots), barY, slotSize, slotSize), "M", "🗺", "MAP", 0f, () => player.ToggleMapPublic()))
             {
                 hoverTitle = "World Map";
                 hoverSub = "Continental Map  •  [M]";
                 hoverDesc = "Explore the world and place a travel waypoint. Roads connect settlements and encounters.";
+            }
+
+            for (int slot = 0; slot < talentSlots; slot++)
+            {
+                int binding = slot;
+                var talent = player.MilestoneInSlot(slot);
+                var rect = new Rect(barX + (slotSize + spacing) * (4 + slot), barY, slotSize, slotSize);
+                if (DrawSlot(rect, (5 + slot).ToString(), "", "",
+                    talent == null ? 0f : player.MilestoneCooldown(talent.Id),
+                    () => player.CastMilestoneSlot(binding), talent?.Icon ?? -1))
+                {
+                    hoverTitle = talent?.Name ?? "Talent slot";
+                    hoverSub = talent == null ? "Unassigned" : $"Instant · {talent.Cooldown:0}s cooldown";
+                    hoverDesc = talent?.Description ?? "Assign a learned active talent from the spellbook [P].";
+                }
             }
 
             // --- 3. Mouseover Tooltip ---
@@ -225,7 +240,7 @@ namespace Riftbound
             }
         }
 
-        bool DrawSlot(Rect rect, string keybind, string icon, string cost, float cd, Action onClick)
+        bool DrawSlot(Rect rect, string keybind, string icon, string cost, float cd, Action onClick, int artwork = -1)
         {
             // Slot background & border
             GUI.DrawTexture(new Rect(rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2), borderTex);
@@ -233,11 +248,17 @@ namespace Riftbound
 
             // Icon symbol
             int cell = IconCell(activeClass, keybind);
-            if (abilityAtlas && cell >= 0)
-                GUI.DrawTextureWithTexCoords(new Rect(rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4),
-                    abilityAtlas, new Rect((cell % 4) * .25f + .003f, (3 - cell / 4) * .25f + .003f, .244f, .244f));
-            else
-                GUI.Label(new Rect(rect.x, rect.y + 8, rect.width, rect.height - 16), keybind == "Z" ? "Ride" : keybind == "M" ? "Map" : keybind, labelStyle);
+            if (artwork < 0) artwork = RiftboundAbilityArt.ForAction(activeClass, keybind);
+            var iconRect = new Rect(rect.x + 2, rect.y + 2, rect.width - 4, rect.height - 4);
+            if (!RiftboundAbilityArt.Draw(iconRect, artwork))
+            {
+                if (abilityAtlas && cell >= 0)
+                    GUI.DrawTextureWithTexCoords(iconRect, abilityAtlas,
+                        new Rect((cell % 4) * .25f + .003f, (3 - cell / 4) * .25f + .003f, .244f, .244f));
+                else if (keybind != "5" && keybind != "6")
+                    GUI.Label(new Rect(rect.x, rect.y + 8, rect.width, rect.height - 16),
+                        keybind == "Z" ? "Ride" : keybind == "M" ? "Map" : keybind, labelStyle);
+            }
             bool hovered = rect.Contains(Event.current.mousePosition);
             if (hovered)
             {
@@ -255,8 +276,8 @@ namespace Riftbound
             }
 
             // Keybind badge (Top-Left)
-            GUI.DrawTexture(new Rect(rect.x + 2, rect.y + 2, 19, 18), bgTex);
-            GUI.Label(new Rect(rect.x + 4, rect.y + 1, 24, 19), keybind, keybindStyle);
+            GUI.DrawTexture(new Rect(rect.x + 2, rect.y + 2, 17, 15), bgTex);
+            GUI.Label(new Rect(rect.x + 4, rect.y + 1, 24, 16), keybind, keybindStyle);
 
             // Cost or sub-label (Bottom-Right)
             if (!string.IsNullOrEmpty(cost) && (keybind == "4" || cost == "ACTIVE"))
@@ -328,6 +349,55 @@ namespace Riftbound
             t.SetPixels(pix);
             t.Apply();
             return t;
+        }
+    }
+
+    public static class RiftboundAbilityArt
+    {
+        static Texture2D combatAtlas, utilityAtlas;
+        static bool loaded;
+        // The painted sheet has uneven row heights. These are the observed grid boundaries.
+        static readonly float[] combatRows = { 0f, .167f, .324f, .486f, .640f, .802f, 1f };
+        static readonly float[] utilityRows = { 0f, .25f, .5f, .75f, 1f };
+
+        public static bool Draw(Rect rect, int cell, float brightness = 1f)
+        {
+            if (cell < 0 || cell >= 46) return false;
+            if (!loaded)
+            {
+                combatAtlas = Resources.Load<Texture2D>("UI/MilestoneAbilityArt");
+                utilityAtlas = Resources.Load<Texture2D>("UI/AdventureAbilityArt");
+                loaded = true;
+            }
+            bool utility = cell >= 30;
+            var texture = utility ? utilityAtlas : combatAtlas;
+            if (!texture) return false;
+            if (utility) cell -= 30;
+            int columns = utility ? 4 : 5;
+            var rows = utility ? utilityRows : combatRows;
+            int row = cell / columns, col = cell % columns;
+            const float inset = .004f;
+            var uv = new Rect((float)col / columns + inset, 1f - rows[row + 1] + inset,
+                1f / columns - inset * 2, rows[row + 1] - rows[row] - inset * 2);
+            var previous = GUI.color;
+            GUI.color = previous * new Color(brightness, brightness, brightness, 1f);
+            GUI.DrawTextureWithTexCoords(rect, texture, uv);
+            GUI.color = previous;
+            return true;
+        }
+
+        public static int ForAction(string characterClass, string key)
+        {
+            int slot = key == "1" ? 0 : key == "2" ? 1 : key == "3" ? 2 : -1;
+            if (slot >= 0)
+                return characterClass switch
+                {
+                    "Mage" => slot == 0 ? 25 : slot == 1 ? 18 : 19,
+                    "Rogue" => slot == 0 ? 20 : slot == 1 ? 22 : 21,
+                    "Paladin" => slot == 0 ? 23 : slot == 1 ? 17 : 26,
+                    _ => slot == 0 ? 15 : slot == 1 ? 16 : 1
+                };
+            return key switch { "4" => 1, "F" => 14, "Q" => 27, "Z" => 30, "H" => 31, "M" => 32, _ => -1 };
         }
     }
 }

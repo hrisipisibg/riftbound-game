@@ -152,10 +152,23 @@ namespace Riftbound.Editor
                     {
                         CaptureUI("HUD"); frontPhase = 3; due = EditorApplication.timeSinceStartup + 1; return;
                     }
+                    if (frontPhase == 3)
+                    {
+                        player.MapOpen = true;
+                        frontPhase = 4;
+                        due = EditorApplication.timeSinceStartup + .65;
+                        return;
+                    }
+                    if (frontPhase == 4)
+                    {
+                        CaptureUI("QuestAtlas"); frontPhase = 5; due = EditorApplication.timeSinceStartup + 1; return;
+                    }
+                    player.MapOpen = false;
                     Results.Add($"World state: menu={FrontendMenu.IsOpen}, paused={player.orbit.Paused}, timeScale={Time.timeScale}, name={player.CharacterName}, frames={Time.frameCount}");
                     Check(!FrontendMenu.IsOpen && !player.orbit.Paused && Time.timeScale > 0, "Entering the world restores gameplay time and camera control");
                     Check(player.CharacterName == "BuildCheck", "Selected character is applied after scene reload");
                     Check(player.CharacterRace == "Human", "Fresh test character retains its selected race");
+                    CheckQuestMapStart(player);
                     if (WorldRegions.Expanded) CheckExpandedWorld(player);
                     Check(player.GetComponentsInChildren<Renderer>().Length > 0, "Character has a visible model");
                     InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
@@ -185,10 +198,14 @@ namespace Riftbound.Editor
                 {
                     var player = Player();
                     var radar = MinimapRadar.Instance;
-                    Check(radar.TrackingMainQuest && radar.customWaypoint.HasValue && Vector3.Distance(radar.customWaypoint.Value, player.questGiver.position) < .1f, "Live quest tracking returns to Abe when the objective is ready");
+                    Check(radar.TrackingMainQuest && radar.TryGetNavigationTarget(out var destination, out _) &&
+                        Vector3.Distance(destination, player.questGiver.position) < .1f, "Live quest tracking returns to Abe when the objective is ready");
+                    Check(RefreshMapAndHas(radar, "abe", MinimapRadar.QuestMark.TurnIn), "Abe's available marker changes to turn-in");
                     TurnIn(player);
                     Check(player.QuestIndex == 1 && !player.QuestAccepted, "Road quest turns in and advances exactly once");
                     OpenAbe(player); player.AcceptQuest();
+                    radar.RefreshQuestPins();
+                    Check(radar.QuestPins.Count(pin => pin.id.StartsWith("supply:")) == 3, "The map shows all three live supply crates");
                     foreach (var crate in Object.FindObjectsByType<SupplyCrate>(FindObjectsSortMode.None))
                     {
                         Move(player, crate.transform.position);
@@ -197,6 +214,8 @@ namespace Riftbound.Editor
                     Check(player.QuestReady && player.Supplies >= 3, "Supply quest collects the three actual crates");
                     TurnIn(player);
                     Check(player.QuestIndex == 2, "Supply hand-in unlocks the captain mission");
+                    if (WorldRegions.Expanded)
+                        Check(RefreshMapAndHas(radar, "western", MinimapRadar.QuestMark.Available), "Rowan appears when the Western Road quest unlocks");
                     var captain = Object.FindObjectsByType<EnemyController>(FindObjectsInactive.Include, FindObjectsSortMode.None).First(e => e.IsMainQuestCaptain);
                     Check(!captain.gameObject.activeSelf, "Captain remains locked until his quest is accepted");
                     OpenAbe(player); player.AcceptQuest();
@@ -216,7 +235,9 @@ namespace Riftbound.Editor
                 }
                 else if (stage == 4)
                 {
-                    Check(!MinimapRadar.Instance.TrackingMainQuest && !MinimapRadar.Instance.customWaypoint.HasValue, "Quest navigation clears after campaign completion");
+                    Check(!MinimapRadar.Instance.TrackingMainQuest && !MinimapRadar.Instance.TryGetNavigationTarget(out _, out _),
+                        "Quest navigation clears after campaign completion");
+                    CheckWesternRoad(Player());
                     Finish(false);
                 }
             }
@@ -225,6 +246,100 @@ namespace Riftbound.Editor
                 Errors.Add(exception.ToString());
                 Finish(true);
             }
+        }
+
+        static bool RefreshMapAndHas(MinimapRadar radar, string id, MinimapRadar.QuestMark kind)
+        {
+            radar.RefreshQuestPins();
+            return radar.QuestPins.Any(pin => pin.id == id && pin.kind == kind);
+        }
+
+        static void CheckQuestMapStart(PlayerController player)
+        {
+            var radar = MinimapRadar.Instance;
+            Check(radar && radar.showMinimap && radar.showCompass, "Minimap and compass are visible by default");
+            Check(RefreshMapAndHas(radar, "abe", MinimapRadar.QuestMark.Available), "The map offers the starting quest at Abe");
+            var abe = radar.QuestPins.First(pin => pin.id == "abe");
+            radar.SelectQuestPin(abe);
+            Check(radar.TryGetNavigationTarget(out var point, out _) && point == player.questGiver.position, "Choosing a quest pin sets a waypoint at its real position");
+            MinimapRadar.ClearWaypoint();
+            if (WorldRegions.Expanded)
+                Check(RefreshMapAndHas(radar, "hollows", MinimapRadar.QuestMark.Available), "The mine quest appears at Fizzlebang before acceptance");
+        }
+
+        static void CheckWesternRoad(PlayerController player)
+        {
+            var camps = WesternRoadCamps.Current;
+            Check(camps && camps.Layby && camps.Rest && camps.Waybill && camps.Ferrymaster, "Western road sites and quest actors load");
+            var cargo = camps.Layby.Find("Spilled shipment");
+            var crateVisual = cargo ? cargo.Find("Timber supply crate") : null;
+            var art = crateVisual ? crateVisual.GetComponentInChildren<Renderer>() : null;
+            Check(art && art.sharedMaterial && art.sharedMaterial.mainTexture && cargo.Find("Grain sack"),
+                "Western cargo uses the imported meshes and palette");
+            Check(cargo.Find("Supply crate").GetComponent<Collider>().enabled, "Cargo art preserves the original collision");
+
+            var rowan = WesternRoadCamps.FindRowan();
+            Check(rowan, "Quartermaster Rowan is available for western quest turn-in");
+            var interact = typeof(PlayerController).GetMethod("Interact", BindingFlags.Instance | BindingFlags.NonPublic);
+            Move(player, rowan.transform.position);
+            interact.Invoke(player, null);
+            player.HandleWesternRoadAtRowan();
+            Check(player.WesternRoadStage == 1 && player.TryGetWesternRoadDestination(out var site, out _) && site == camps.Layby.position,
+                "Rowan starts the western quest and marks the layby");
+            player.CloseShop();
+
+            var engineer = Object.FindObjectsByType<TownNPC>(FindObjectsSortMode.None)
+                .Single(npc => npc.npcName == BrassHollows.Engineer);
+            Move(player, engineer.transform.position);
+            player.OpenTownNPCDialogue(engineer);
+            player.HandleBrassHollowsQuest();
+            player.CloseDialogue();
+            var radar = MinimapRadar.Instance;
+            var cave = BrassHollows.Current;
+            Check(player.BrassHollowsQuestActive && cave &&
+                radar.TryGetNavigationTarget(out var entrance, out _) && entrance == cave.Entrance,
+                "Explicit cave tracking selects the mine entrance");
+            Move(player, new Vector3(642, 36.5f, 167));
+            Check(BrassHollows.Inside(player.transform.position), "Navigation fixture enters cave bounds");
+            radar.FollowWesternRoad();
+            var pin = cave.Entrance + Vector3.forward * 5;
+            MinimapRadar.SetWaypoint(pin, "Personal map pin");
+            Check(radar.TryGetNavigationTarget(out var selected, out var caption) && selected == pin && caption == "Personal map pin",
+                "Manual pin overrides the tracked quest");
+            MinimapRadar.ClearWaypoint();
+            Check(radar.TryGetNavigationTarget(out var western, out _) && western == camps.Layby.position,
+                "Clearing a pin inside the cave resumes the explicitly tracked western quest");
+
+            Move(player, camps.Waybill.position);
+            interact.Invoke(player, null);
+            Check(player.WesternRoadStage == 1, "Guarded waybill cannot be recovered early");
+
+            var guards = camps.Layby.GetComponentsInChildren<EnemyController>();
+            Check(guards.Count(enemy => enemy.enemyId.StartsWith("western-waybill-")) == 2, "Western quest spawns exactly two guards");
+            foreach (var guard in guards.Where(enemy => enemy.enemyId.StartsWith("western-waybill-")))
+                guard.GetComponent<Combatant>().Damage(100000);
+            interact.Invoke(player, null);
+            Check(player.WesternRoadStage == 2 && player.TryGetWesternRoadDestination(out var witness, out _) &&
+                  witness == camps.Ferrymaster.transform.position, "Waybill advances the objective to Sera");
+            Move(player, camps.Ferrymaster.transform.position);
+            player.OpenTownNPCDialogue(camps.Ferrymaster);
+            player.ReadFerryTally();
+            player.CloseDialogue();
+            Check(player.WesternRoadStage == 3, "Sera supplies the ferry tally");
+
+            Move(player, rowan.transform.position);
+            interact.Invoke(player, null);
+            int before = player.Gold;
+            player.HandleWesternRoadAtRowan();
+            player.HandleWesternRoadAtRowan();
+            Check(player.WesternRoadStage == 4 && player.Gold == before + 35, "Western turn-in rewards exactly once");
+            player.CloseShop();
+            player.SaveAdventure(false);
+            player.LoadAdventure();
+            Check(player.WesternRoadStage == 4 && !player.TryGetWesternRoadDestination(out _, out _),
+                "Western quest completion survives reload and clears its objective");
+            Check(radar.TryGetNavigationTarget(out var next, out _) && next == cave.Entrance,
+                "Completing the tracked western quest falls back to the active cave quest");
         }
 
         static void Move(PlayerController player, Vector3 position)
@@ -285,12 +400,23 @@ namespace Riftbound.Editor
                 Check(system.CurrentProgress == 1, "Survey ignores repeated discoveries");
                 player.LoadAdventure(); system.LoadData();
                 Check(system.CurrentProgress == 1, "Survey progress survives reload");
+                Vector3 personalPin = WorldRegions.Highspire;
+                MinimapRadar.SetWaypoint(personalPin, "Keep this pin");
                 player.DiscoverLandmark(ExplorationSites.SurveyIds[1]); player.DiscoverLandmark(ExplorationSites.SurveyIds[2]);
                 Check(system.HasActiveQuestToComplete(npc.npcName, player), "All sites make the survey ready for hand-in");
-                Check(MinimapRadar.Instance.customWaypoint.HasValue && Vector3.Distance(MinimapRadar.Instance.customWaypoint.Value, npc.transform.position) < .1f, "Completed survey waypoint returns to the cartographer");
+                var radar = MinimapRadar.Instance;
+                Check(radar.TryGetNavigationTarget(out var pinned, out _) && pinned == personalPin,
+                    "Survey discoveries preserve a manual pin");
+                MinimapRadar.ClearWaypoint();
+                Check(radar.TryGetNavigationTarget(out var turnIn, out _) && Vector3.Distance(turnIn, npc.transform.position) < .1f,
+                    "Removing the pin resumes the survey turn-in objective");
+                MinimapRadar.SetWaypoint(personalPin, "Keep this pin");
                 Move(player, npc.transform.position + Vector3.forward);
                 system.CompleteQuest(player);
                 Check(system.IsQuestCompleted("frontier_cartography"), "Survey completion is recorded");
+                Check(radar.TryGetNavigationTarget(out var afterTurnIn, out _) && afterTurnIn == personalPin,
+                    "Faction turn-in preserves a manual pin");
+                MinimapRadar.ClearWaypoint();
                 int gold = player.Gold, xp = player.Experience;
                 system.CompleteQuest(player);
                 Check(player.Gold == gold && player.Experience == xp, "Survey hand-in rewards cannot repeat");
@@ -314,7 +440,10 @@ namespace Riftbound.Editor
             var captain = actors.Single(e => e.enemyId == RiverReaverCamp.CaptainId);
             var stats = captain.GetComponent<Combatant>();
             Check(captain.animator && captain.isBoss && stats.maxHealth == 260, "River Reaver captain has a complete boss rig and vitals");
-            Check(AssetDatabase.GetAssetPath(WorldRegions.TerrainAt(RiverReaverCamp.Position).terrainData).Contains("/ReaverCamp/"), "Camp uses a separate terrain asset");
+            var tile = WorldRegions.TerrainAt(RiverReaverCamp.Position);
+            Check(tile && tile.GetComponent<TerrainCollider>().terrainData == tile.terrainData &&
+                Terrain.activeTerrains.Count(other => other.terrainData == tile.terrainData) == 1,
+                "Camp uses its own terrain data for render and collision");
             Check(ReaverCampTerrainSetup.CheckApproach() <= 35, "Camp approach supports walking and mounted travel below35 degrees");
             Check(actors.Count(e => e.enemyId.StartsWith("westbank-reaver-")) == 3, "River Reaver camp has exactly one captain and two guards");
             CheckEnemyDisengagement(player, captain);
@@ -382,9 +511,11 @@ namespace Riftbound.Editor
                     wall.name = "Isolated enemy sight test wall";
                     wall.transform.position = home + Vector3.forward * 2 + Vector3.up;
                     wall.transform.localScale = new Vector3(3, 3, .25f); Physics.SyncTransforms();
-                    Check(!(bool)type.GetMethod("ClearSight", hidden).Invoke(actor, null), "A solid wall blocks enemy line of sight");
+                    var sight = type.GetMethod("ClearSightForTarget", hidden);
+                    var sightTarget = new object[] { player.transform };
+                    Check(!(bool)sight.Invoke(actor, sightTarget), "A solid wall blocks enemy line of sight");
                     wall.SetActive(false); Physics.SyncTransforms();
-                    Check((bool)type.GetMethod("ClearSight", hidden).Invoke(actor, null), "Enemy sight accepts the player collider when the path is clear");
+                    Check((bool)sight.Invoke(actor, sightTarget), "Enemy sight accepts the player collider when the path is clear");
                 }
                 finally { Object.Destroy(wall); }
             }
@@ -489,14 +620,8 @@ namespace Riftbound.Editor
             Check(worldBoss.gameObject.activeSelf, "World boss is available independently of Abe's quest");
             OpenAbe(player); player.AcceptQuest();
             Check(player.QuestAccepted, "Abe's road mission is accepted");
-            var radar = MinimapRadar.Instance;
-            bool minimapPreference = radar.showMinimap;
-            radar.TrackMainQuest();
-            Check(radar.TrackingMainQuest, "Journal navigation can start live tracking");
-            Check(radar.RadarVisible && radar.showMinimap == minimapPreference, "Quest tracking shows the radar without changing the minimap preference");
-            MinimapRadar.ClearWaypoint();
-            Check(!radar.TrackingMainQuest && radar.RadarVisible == minimapPreference, "Stopping quest tracking restores the configured radar visibility");
-            radar.TrackMainQuest();
+            MinimapRadar.Instance.TrackMainQuest();
+            Check(MinimapRadar.Instance.TrackingMainQuest, "Journal navigation can start live tracking");
             Check(all.Any(e => e.IsRoadRaider && e.transform.position == player.ObjectivePosition), "Road objective targets a real raider instead of a dummy or unrelated enemy");
             DefeatTestEnemy(player, "regression-side-boss", true);
             DefeatTestEnemy(player, "regression-rat");

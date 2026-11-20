@@ -27,15 +27,17 @@ namespace Riftbound
 
         static Vector3 Ground(Vector3 point) { point.y = WorldRegions.GroundHeight(point) + .03f; return point; }
 
-        static void CreateEnemy(Transform parent, PlayerController player, string id, string name, string race, string cls, Vector3 point, bool boss)
+        internal static void CreateEnemy(Transform parent, PlayerController player, string id, string name, string race, string cls, Vector3 point, bool boss, bool ranged = false)
         {
             var root = new GameObject(name);
             root.SetActive(false);
             root.transform.SetParent(parent); root.transform.position = Ground(point);
             root.transform.rotation = Quaternion.Euler(0, 180, 0);
-            var visual = CharacterVisualFactory.CreateVisualInstance(race, cls, root.transform);
+            var visual = CharacterVisualFactory.CreateVisualInstance(race, cls, root.transform, hostile: true);
             var enemy = root.AddComponent<EnemyController>();
             enemy.enemyId = id; enemy.player = player; enemy.isBoss = boss;
+            enemy.ranged = ranged;
+            if (ranged) enemy.attackRange = 11f;
             enemy.heavyAttacker = boss; enemy.campGuard = true; enemy.nativeDeathAnimation = true;
             enemy.animator = visual ? visual.GetComponentInChildren<Animator>() : null;
             enemy.attackDamage = boss ? 16 : 7; enemy.attackInterval = boss ? 2.4f : 2;

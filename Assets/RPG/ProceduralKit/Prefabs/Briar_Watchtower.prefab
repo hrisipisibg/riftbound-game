@@ -1,0 +1,171 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5067005805173382511
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4185356803107920248}
+  - component: {fileID: 3021727338605804982}
+  m_Layer: 0
+  m_Name: Briar_Watchtower
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4185356803107920248
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5067005805173382511}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8041964915407434182}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!205 &3021727338605804982
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5067005805173382511}
+  serializedVersion: 3
+  m_LocalReferencePoint: {x: 0, y: 3.0933595, z: 0.37034488}
+  m_Size: 6.218088
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.24
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 7709122793832952036}
+  - screenRelativeHeight: 0.102
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 1647207360618731797}
+  - screenRelativeHeight: 0.017
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 9048545978937235970}
+  m_Enabled: 1
+  m_GlobalIlluminationLOD: 0
+--- !u!1001 &7498622048231413293
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4185356803107920248}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      propertyPath: m_Name
+      value: Briar_Watchtower
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 4742473837712756890, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: -2477846340207955197, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7515571714461407439}
+  m_SourcePrefab: {fileID: 100100000, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+--- !u!23 &1647207360618731797 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -86558674928513224, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+  m_PrefabInstance: {fileID: 7498622048231413293}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3858633698850759982 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -2477846340207955197, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+  m_PrefabInstance: {fileID: 7498622048231413293}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &7515571714461407439
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3858633698850759982}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 3370809642973853039, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+--- !u!23 &7709122793832952036 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 210608497798768329, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+  m_PrefabInstance: {fileID: 7498622048231413293}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8041964915407434182 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+  m_PrefabInstance: {fileID: 7498622048231413293}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &9048545978937235970 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1549961365696351279, guid: b438d0f42f859ca4796e81e76c68bf13, type: 3}
+  m_PrefabInstance: {fileID: 7498622048231413293}
+  m_PrefabAsset: {fileID: 0}
